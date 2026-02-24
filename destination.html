@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Destination Detail — Golf Bach Party</title>
+<link rel="stylesheet" href="style-shared.css">
+<script src="data.js"></script>
+<style>
+/* ── Hub Toggle Bar ──────────────────────────────────────── */
+.hub-bar{
+  background:var(--navy);
+  padding:.6rem 1.25rem;
+  display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;
+}
+.hub-bar-label{
+  font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);
+  text-transform:uppercase;letter-spacing:.1em;margin-right:.25rem;white-space:nowrap;
+}
+.hub-btn{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.7);
+  font-size:.78rem;font-weight:700;
+  padding:.32rem .9rem;border-radius:20px;
+  transition:all .2s ease;white-space:nowrap;
+}
+.hub-btn:hover{background:rgba(184,147,58,.25);border-color:rgba(184,147,58,.6);color:#fff;}
+.hub-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
+
+/* ── Hero ────────────────────────────────────────────────── */
+.dest-hero{
+  position:relative;height:420px;overflow:hidden;
+}
+.dest-hero-img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:brightness(.55);
+}
+.dest-hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(10,20,30,.9) 0%, rgba(10,20,30,.3) 60%, transparent 100%);
+}
+.dest-hero-content{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:2rem 1.5rem;
+}
+.back-btn{
+  position:absolute;top:1rem;left:1rem;
+  background:rgba(15,31,46,.7);color:#fff;
+  border:1px solid rgba(255,255,255,.25);
+  font-size:.78rem;font-weight:700;
+  padding:.35rem .85rem;border-radius:20px;
+  text-decoration:none;
+  display:inline-flex;align-items:center;gap:.4rem;
+  backdrop-filter:blur(6px);
+  transition:all .2s ease;z-index:10;
+}
+.back-btn:hover{background:rgba(184,147,58,.4);border-color:var(--gold);}
+.hero-region{
+  font-size:.72rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--gold);margin-bottom:.4rem;
+}
+.hero-name{
+  font-family:'Playfair Display',serif;
+  font-size:2.4rem;font-weight:700;color:#fff;
+  line-height:1.1;margin-bottom:.6rem;
+}
+@media(max-width:520px){.hero-name{font-size:1.8rem;} .dest-hero{height:320px;}}
+.hero-badge-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.hero-vibe{
+  font-size:.82rem;color:rgba(255,255,255,.7);
+  font-style:italic;
+}
+
+/* ── Stat Bar ────────────────────────────────────────────── */
+.stat-bar{
+  background:var(--navy);
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  border-bottom:3px solid var(--gold);
+}
+@media(max-width:700px){.stat-bar{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:380px){.stat-bar{grid-template-columns:repeat(2,1fr);}}
+.stat-bar-cell{
+  padding:.9rem .6rem;text-align:center;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.stat-bar-cell:last-child{border-right:none;}
+.stat-bar-label{
+  font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;
+  color:rgba(255,255,255,.45);display:block;margin-bottom:.2rem;
+}
+.stat-bar-val{
+  font-size:1.15rem;font-weight:800;color:#fff;display:block;line-height:1.1;
+}
+.stat-bar-val.gold{color:var(--gold);}
+.stat-bar-val.green{color:#4ade80;}
+.stat-bar-val.red{color:#f87171;}
+
+/* ── Body layout ─────────────────────────────────────────── */
+.dest-body{
+  max-width:1100px;margin:0 auto;
+  padding:2rem 1.25rem 4rem;
+  display:grid;
+  grid-template-columns:1fr 620px;
+  gap:2rem;
+}
+@media(max-width:1100px){.dest-body{grid-template-columns:1fr 500px;}} @media(max-width:860px){.dest-body{grid-template-columns:1fr;}}
+
+/* ── Section headings ────────────────────────────────────── */
+.section-head{
+  display:flex;align-items:center;gap:.75rem;
+  margin:0 0 1.1rem;
+  padding-bottom:.6rem;
+  border-bottom:2px solid var(--border);
+}
+.section-head-icon{font-size:1.3rem;}
+.section-head h2{
+  font-family:'Playfair Display',serif;
+  font-size:1.25rem;color:var(--navy);margin:0;
+}
+[data-theme="dark"] .section-head h2{color:var(--cream);}
+
+/* ── Group Notes ─────────────────────────────────────────── */
+.group-notes{
+  background:linear-gradient(135deg, rgba(184,147,58,.08) 0%, rgba(184,147,58,.03) 100%);
+  border:1px solid rgba(184,147,58,.25);
+  border-left:4px solid var(--gold);
+  border-radius:var(--radius);
+  padding:1rem 1.1rem;
+  font-size:.9rem;color:var(--text);line-height:1.65;
+  margin-bottom:1.75rem;
+}
+
+/* ── Flight cost table ───────────────────────────────────── */
+.flight-table{
+  width:100%;border-collapse:collapse;
+  font-size:.88rem;margin-bottom:1.75rem;
+  border-radius:var(--radius);overflow:hidden;
+}
+.flight-table th{
+  background:var(--navy);color:#fff;
+  padding:.6rem .9rem;text-align:left;
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
+}
+.flight-table td{
+  padding:.65rem .9rem;
+  border-bottom:1px solid var(--border-light);
+  color:var(--text);
+}
+.flight-table tr:last-child td{border-bottom:none;}
+.flight-table tr:nth-child(even) td{background:var(--cream2);}
+.flight-hub-code{font-weight:800;color:var(--navy);}
+[data-theme="dark"] .flight-hub-code{color:var(--gold);}
+.flight-hub-city{color:var(--text-muted);font-size:.8rem;}
+.flight-price{font-weight:800;color:var(--gold);font-size:1rem;}
+.flight-total{font-size:.82rem;color:var(--text-muted);}
+.hub-highlight td{background:rgba(184,147,58,.08) !important;border-left:3px solid var(--gold);}
+
+/* ── Cost breakdown ──────────────────────────────────────── */
+.cost-breakdown{margin-bottom:1.75rem;}
+.cost-total-display{
+  display:flex;align-items:baseline;gap:.5rem;
+  margin-bottom:1rem;
+}
+.cost-total-num{
+  font-size:2.4rem;font-weight:900;color:var(--gold);
+  font-family:'Playfair Display',serif;
+}
+.cost-total-label{font-size:.82rem;color:var(--text-muted);}
+.cost-bars{}
+.cost-bar-row{
+  display:flex;align-items:center;gap:.75rem;
+  margin-bottom:.5rem;
+}
+.cost-bar-name{width:90px;font-size:.78rem;color:var(--text-muted);text-align:right;flex-shrink:0;}
+.cost-bar-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.cost-bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+.cost-bar-amt{width:54px;font-size:.8rem;font-weight:700;color:var(--text);flex-shrink:0;}
+
+/* ── Golf Courses ────────────────────────────────────────── */
+.course-zone{margin-bottom:1.5rem;}
+.course-zone-header{
+  display:flex;align-items:center;gap:.5rem;
+  margin-bottom:.7rem;
+}
+.zone-badge{
+  font-size:.68rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:.08em;
+  padding:.2rem .6rem;border-radius:20px;
+  white-space:nowrap;
+}
+.zone-on-site{background:#dcfce7;color:#166534;}
+.zone-under30{background:#dbeafe;color:#1e40af;}
+.zone-30to60{background:#ede9fe;color:#5b21b6;}
+.zone-1to2hr{background:#fef3c7;color:#92400e;}
+.zone-over2hr{background:#fee2e2;color:#991b1b;}
+[data-theme="dark"] .zone-on-site{background:rgba(22,163,74,.25);color:#86efac;}
+[data-theme="dark"] .zone-under30{background:rgba(37,99,235,.25);color:#93c5fd;}
+[data-theme="dark"] .zone-30to60{background:rgba(91,33,182,.25);color:#c4b5fd;}
+[data-theme="dark"] .zone-1to2hr{background:rgba(146,64,14,.25);color:#fcd34d;}
+[data-theme="dark"] .zone-over2hr{background:rgba(153,27,27,.25);color:#fca5a5;}
+
+.course-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:.8rem 1rem;
+  margin-bottom:.6rem;
+  display:flex;align-items:flex-start;gap:.75rem;
+  transition:all .2s ease;
+}
+.course-card:hover{border-color:var(--gold);box-shadow:var(--shadow-sm);}
+.course-rank-num{
+  font-size:1.1rem;font-weight:900;color:var(--gold);
+  min-width:28px;text-align:center;margin-top:.05rem;
+}
+.course-info{flex:1;}
+.course-name{
+  font-weight:700;color:var(--text);font-size:.92rem;
+  margin-bottom:.2rem;
+}
+.course-name a{
+  color:var(--navy);text-decoration:none;
+  transition:color .15s;
+}
+[data-theme="dark"] .course-name a{color:var(--gold-light);}
+.course-name a:hover{color:var(--gold);text-decoration:underline;}
+.course-meta{
+  display:flex;flex-wrap:wrap;gap:.4rem;
+  margin-top:.3rem;
+}
+.course-tag{
+  font-size:.67rem;font-weight:600;
+  background:var(--cream2);color:var(--text-muted);
+  padding:.12rem .42rem;border-radius:4px;
+}
+.course-tag.drive{background:#f0f9ff;color:#0369a1;}
+[data-theme="dark"] .course-tag.drive{background:rgba(3,105,161,.2);color:#7dd3fc;}
+.course-fee{font-size:.82rem;font-weight:700;color:var(--gold);}
+.course-rating{display:flex;align-items:center;gap:.15rem;font-size:.78rem;font-weight:700;color:var(--text);}
+
+/* ── Weather ─────────────────────────────────────────────── */
+.weather-grid{
+  display:grid;grid-template-columns:repeat(6,1fr);
+  gap:.4rem;margin-bottom:1.75rem;
+}
+@media(max-width:500px){.weather-grid{grid-template-columns:repeat(4,1fr);}}
+.weather-cell{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:8px;padding:.5rem .3rem;text-align:center;
+}
+.weather-month{font-size:.62rem;text-transform:uppercase;color:var(--text-muted);font-weight:700;}
+.weather-high{font-size:.95rem;font-weight:800;color:var(--text);display:block;margin:.1rem 0;}
+.weather-icon{font-size:.9rem;}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.dest-sidebar{}
+.sidebar-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.5rem 1.4rem;
+  margin-bottom:1.5rem;
+  box-shadow:var(--shadow-sm);
+}
+.sidebar-card h3{
+  font-family:'Playfair Display',serif;
+  font-size:1.2rem;color:var(--navy);
+  margin:0 0 1rem;
+  padding-bottom:.6rem;
+  border-bottom:2px solid var(--border);
+}
+[data-theme="dark"] .sidebar-card h3{color:var(--cream);}
+.info-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:.5rem 0;border-bottom:1px solid var(--border-light);
+  font-size:.95rem;
+}
+.info-row:last-child{border-bottom:none;}
+.info-key{color:var(--text-muted);}
+.info-val{font-weight:700;color:var(--text);text-align:right;}
+.info-val.gold{color:var(--gold);}
+.info-val.green{color:#16a34a;}
+.info-val.red{color:#dc2626;}
+
+/* CTA button */
+.cta-btn{
+  display:block;width:100%;
+  background:var(--gold);color:#fff;
+  font-weight:800;font-size:.88rem;
+  text-align:center;padding:.75rem;
+  border-radius:var(--radius);
+  text-decoration:none;
+  transition:background .2s ease;
+  margin-bottom:.65rem;
+}
+.cta-btn:hover{background:var(--gold-light);}
+.cta-btn.outline{
+  background:transparent;
+  border:2px solid var(--navy);
+  color:var(--navy);
+}
+[data-theme="dark"] .cta-btn.outline{border-color:var(--cream);color:var(--cream);}
+.cta-btn.outline:hover{background:var(--navy);color:#fff;}
+
+/* score rings */
+.score-ring-row{
+  display:flex;justify-content:space-around;
+  padding:.5rem 0;
+}
+.score-ring{text-align:center;}
+.score-ring-num{
+  font-size:1.6rem;font-weight:900;
+  color:var(--gold);
+  font-family:'Playfair Display',serif;
+  line-height:1;
+}
+.score-ring-lbl{font-size:.62rem;text-transform:uppercase;color:var(--text-muted);font-weight:700;letter-spacing:.06em;margin-top:.2rem;}
+
+/* Nav hub indicator */
+.nav-hub-badge{
+  font-size:.7rem;font-weight:700;
+  background:var(--gold);color:#fff;
+  padding:.15rem .45rem;border-radius:20px;
+  margin-left:.3rem;
+}
+
+/* ── Course selector for calculator ─────────────────────── */
+.course-selector-panel{
+  background:linear-gradient(135deg,rgba(184,147,58,.06) 0%,rgba(184,147,58,.02) 100%);
+  border:1px solid rgba(184,147,58,.3);
+  border-radius:var(--radius);
+  padding:1.1rem 1.2rem;
+  margin-bottom:1.25rem;
+}
+.course-sel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:.8rem;
+}
+.course-sel-title{
+  font-family:'Playfair Display',serif;
+  font-size:1rem;font-weight:700;color:var(--navy);
+}
+[data-theme="dark"] .course-sel-title{color:var(--cream);}
+.course-sel-hint{font-size:.72rem;color:var(--text-muted);}
+.course-sel-list{
+  display:flex;flex-direction:column;gap:.4rem;
+  max-height:280px;overflow-y:auto;
+}
+.course-sel-item{
+  display:flex;align-items:center;gap:.65rem;
+  padding:.4rem .5rem;border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--white);
+  transition:all .2s;cursor:pointer;
+}
+.course-sel-item:hover{border-color:var(--gold);background:rgba(184,147,58,.05);}
+.course-sel-item.checked{border-color:var(--gold);background:rgba(184,147,58,.08);}
+.course-sel-cb{
+  width:16px;height:16px;flex-shrink:0;
+  accent-color:var(--gold);
+}
+.course-sel-name{font-size:.82rem;font-weight:600;color:var(--text);flex:1;}
+.course-sel-fee{font-size:.78rem;font-weight:700;color:var(--gold);white-space:nowrap;}
+.course-sel-add-btn{
+  display:block;width:100%;margin-top:.8rem;
+  background:var(--gold);color:#fff;
+  font-weight:700;font-size:.85rem;
+  padding:.6rem;border-radius:var(--radius-sm);
+  border:none;transition:background .2s;cursor:pointer;
+  text-align:center;
+}
+.course-sel-add-btn:hover{background:var(--gold-light);}
+.course-sel-add-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;}
+
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────── -->
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">⛳ Golf Trip <span>2025</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">🏠 <span class="nav-link-label">Home</span></a>
+    <a href="explorer.html" class="nav-link">✈️ <span class="nav-link-label">Flight Map</span></a>
+    <a href="calculator.html" class="nav-link">🧮 <span class="nav-link-label">Calculator</span></a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌓</button>
+  </div>
+</nav>
+
+<!-- ── Hub Toggle Bar ──────────────────────────────────────── -->
+<div class="hub-bar">
+  <span class="hub-bar-label">✈ Departure:</span>
+  <button class="hub-btn active" id="hub-SFO" onclick="setHub('SFO',this)">🌉 SFO — San Francisco</button>
+  <button class="hub-btn" id="hub-LAX" onclick="setHub('LAX',this)">🌴 LAX — Los Angeles</button>
+  <button class="hub-btn" id="hub-JFK" onclick="setHub('JFK',this)">🗽 JFK — New York</button>
+  <button class="hub-btn" id="hub-BOS" onclick="setHub('BOS',this)">🦞 BOS — Boston</button>
+</div>
+
+<!-- ── Hero (populated by JS) ─────────────────────────────── -->
+<div class="dest-hero" id="destHero">
+  <img class="dest-hero-img" id="heroImg" src="" alt="">
+  <div class="dest-hero-overlay"></div>
+  <a href="index.html" class="back-btn">← All Destinations</a>
+  <div class="dest-hero-content">
+    <div class="hero-region" id="heroRegion"></div>
+    <div class="hero-name" id="heroName"></div>
+    <div class="hero-badge-row">
+      <span id="heroBadge" class="badge"></span>
+      <span class="hero-vibe" id="heroVibe"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stat Bar ───────────────────────────────────────────── -->
+<div class="stat-bar" id="statBar">
+  <div class="stat-bar-cell"><span class="stat-bar-label">Est. Cost/Person</span><span class="stat-bar-val gold" id="sbCost">—</span></div>
+  <div class="stat-bar-cell"><span class="stat-bar-label">Golf Score</span><span class="stat-bar-val" id="sbGolf">—</span></div>
+  <div class="stat-bar-cell"><span class="stat-bar-label">Aug High</span><span class="stat-bar-val" id="sbTemp">—</span></div>
+  <div class="stat-bar-cell"><span class="stat-bar-label">Nearest Airport</span><span class="stat-bar-val" id="sbAirport">—</span></div>
+  <div class="stat-bar-cell"><span class="stat-bar-label">Drive from Airport</span><span class="stat-bar-val" id="sbDrive">—</span></div>
+  <div class="stat-bar-cell"><span class="stat-bar-label">Passport Needed</span><span class="stat-bar-val" id="sbPassport">—</span></div>
+</div>
+
+<!-- ── Body ──────────────────────────────────────────────── -->
+<div class="dest-body">
+
+  <!-- ── MAIN COLUMN ──────────────────────────────────────── -->
+  <div class="dest-main">
+
+    <!-- Group Notes -->
+    <div id="groupNotes" class="group-notes"></div>
+
+    <!-- Flight Costs -->
+    <div class="section-head">
+      <span class="section-head-icon">✈️</span>
+      <h2>Flight Costs from All Hubs</h2>
+    </div>
+    <table class="flight-table" id="flightTable">
+      <thead>
+        <tr>
+          <th>Hub</th>
+          <th>City</th>
+          <th>Flight (est.)</th>
+          <th>Est. Trip Total / Person</th>
+        </tr>
+      </thead>
+      <tbody id="flightBody"></tbody>
+    </table>
+
+    <!-- Cost Breakdown -->
+    <div class="section-head">
+      <span class="section-head-icon">💰</span>
+      <h2>Trip Cost Breakdown <span style="font-size:.8rem;font-weight:400;color:var(--text-muted)" id="breakdownHubLabel"></span></h2>
+    </div>
+    <div class="cost-breakdown">
+      <div class="cost-total-display">
+        <span class="cost-total-num" id="costTotalNum">—</span>
+        <span class="cost-total-label">per person · 4 nights · 3 rounds · group of 8 · mid lodging</span>
+      </div>
+      <div class="cost-bars" id="costBars"></div>
+    </div>
+
+    <!-- Golf Courses -->
+    <div class="section-head">
+      <span class="section-head-icon">⛳</span>
+      <h2>Golf Courses — Ranked by Distance</h2>
+    </div>
+    <div id="courseZones"></div>
+
+    <!-- Weather -->
+    <div class="section-head">
+      <span class="section-head-icon">🌡️</span>
+      <h2>Monthly High Temperatures</h2>
+    </div>
+    <div class="weather-grid" id="weatherGrid"></div>
+
+  </div><!-- end main -->
+
+  <!-- ── SIDEBAR ───────────────────────────────────────────── -->
+  <aside class="dest-sidebar">
+
+    <!-- Quick Info -->
+    <div class="sidebar-card">
+      <h3>📋 Quick Info</h3>
+      <div id="quickInfo"></div>
+    </div>
+
+    <!-- Scores -->
+    <div class="sidebar-card">
+      <h3>📊 Scores</h3>
+      <div class="score-ring-row" id="scoreRings"></div>
+    </div>
+
+    <!-- Lodging -->
+    <div class="sidebar-card">
+      <h3>🏨 Lodging (Per Night)</h3>
+      <div id="lodgingInfo"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="sidebar-card">
+      <h3>🔗 Actions</h3>
+      <a href="#" class="cta-btn" id="calcLink">🧮 Open in Calculator</a>
+      <a href="explorer.html" class="cta-btn outline">✈️ View on Flight Map</a>
+    </div>
+
+  </aside>
+</div><!-- end dest-body -->
+
+<footer style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);">
+  ⛳ Golf Bach Party 2025 · All costs are estimates per person · Prices vary by season
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+var dest = null;
+var currentHub = 'SFO';
+
+// ═══════════════════════════════════════════════════════════
+//  EXTENDED COURSE DATA  (keyed by destination id)
+//  zones: "on-site" | "under30" | "30to60" | "1to2hr" | "over2hr"
+// ═══════════════════════════════════════════════════════════
+var COURSE_DETAIL = {
+
+  "central-oregon": [
+    {name:"Crosswater Club",zone:"on-site",designer:"Bob Cupp",type:"Resort — Members & Guests",fee:245,rating:9.5,drive:"On property (Sunriver)",url:"https://www.sunriverresort.com/golf"},
+    {name:"Pronghorn — Jack Nicklaus Course",zone:"on-site",designer:"Jack Nicklaus",type:"Resort",fee:195,rating:9.2,drive:"On property (Pronghorn)",url:"https://pronghornresort.com/golf/"},
+    {name:"Pronghorn — Tom Fazio Course",zone:"on-site",designer:"Tom Fazio",type:"Resort",fee:195,rating:9.0,drive:"On property (Pronghorn)",url:"https://pronghornresort.com/golf/"},
+    {name:"Tetherow Golf Club",zone:"under30",designer:"David McLay Kidd",type:"Public",fee:185,rating:9.3,drive:"20 min from Sunriver",url:"https://www.tetherow.com/golf"},
+    {name:"Sunriver Meadows Course",zone:"on-site",designer:"Fred Federspiel",type:"Resort",fee:95,rating:7.5,drive:"On property (Sunriver)",url:"https://www.sunriverresort.com/golf"},
+    {name:"Sunriver Woodlands Course",zone:"on-site",designer:"Robert Trent Jones Jr.",type:"Resort",fee:95,rating:7.8,drive:"On property (Sunriver)",url:"https://www.sunriverresort.com/golf"},
+    {name:"Eagle Crest — Ridge Course",zone:"under30",designer:"John Thronson",type:"Public",fee:65,rating:7.0,drive:"25 min from Bend",url:"https://www.eagle-crest.com/golf"},
+    {name:"Widgi Creek Golf Club",zone:"under30",designer:"Robert Muir Graves",type:"Semi-Private",fee:75,rating:7.2,drive:"15 min from Sunriver",url:"https://widgicreek.com"},
+    {name:"Brasada Ranch Golf Course",zone:"30to60",designer:"Peter Jacobsen / Jim Hardy",type:"Resort",fee:145,rating:8.2,drive:"45 min from Bend",url:"https://www.brasada.com/golf"},
+    {name:"Quail Run Golf Course",zone:"under30",designer:"Gene Maddox",type:"Public",fee:45,rating:6.5,drive:"5 min from La Pine",url:"https://www.quailrungolf.net"}
+  ],
+
+  "coeur-dalene": [
+    {name:"Coeur d'Alene Resort Golf Course",zone:"on-site",designer:"Scott Miller",type:"Resort — Floating 14th Green",fee:295,rating:9.5,drive:"On property",url:"https://www.cdaresort.com/golf"},
+    {name:"The Golf Club at Black Rock",zone:"30to60",designer:"Tom Fazio",type:"Semi-Private",fee:225,rating:9.4,drive:"30 min south on Lake CdA",url:"https://www.blackrockidaho.com/golf"},
+    {name:"Circling Raven Golf Club",zone:"30to60",designer:"Gene Bates",type:"Public (Casino)",fee:85,rating:8.5,drive:"35 min west",url:"https://www.cdacasino.com/golf"},
+    {name:"Avondale Golf Club",zone:"under30",designer:"Robert Muir Graves",type:"Semi-Private",fee:65,rating:7.8,drive:"15 min north",url:"https://www.avondalegolfclub.com"},
+    {name:"The Highlands Golf Course",zone:"under30",designer:"Unknown",type:"Public",fee:45,rating:7.0,drive:"20 min",url:"https://www.highlandsgc.com"},
+    {name:"Twin Lakes Village Golf Course",zone:"30to60",designer:"Robert Muir Graves",type:"Semi-Private",fee:55,rating:7.2,drive:"40 min north",url:"https://twinlakesvillagegolf.com"},
+    {name:"Idaho Club (Sandpoint)",zone:"1to2hr",designer:"Jack Nicklaus",type:"Private — Check Access",fee:0,rating:9.3,drive:"1 hr 10 min north",url:"https://www.theidahoclub.com"},
+    {name:"Esmeralda Golf Course (Spokane)",zone:"1to2hr",designer:"Francis James",type:"Public",fee:40,rating:7.0,drive:"1 hr west (Spokane)",url:"https://www.spokaneparks.org/golf"},
+    {name:"Indian Canyon Golf Course (Spokane)",zone:"1to2hr",designer:"H. Chandler Egan",type:"Public — Top-rated muni",fee:40,rating:8.0,drive:"1 hr west (Spokane)",url:"https://www.spokaneparks.org/golf"}
+  ],
+
+  "traverse-city": [
+    {name:"Arcadia Bluffs — Bluffs Course",zone:"under30",designer:"Warren Henderson / Rick Smith",type:"Public — #1 in Michigan",fee:185,rating:9.7,drive:"25 min south",url:"https://arcadiabluffs.com"},
+    {name:"Arcadia Bluffs — South Course",zone:"under30",designer:"Dana Fry / Jason Straka",type:"Public",fee:155,rating:9.2,drive:"25 min south",url:"https://arcadiabluffs.com"},
+    {name:"Grand Traverse Resort — Spruce Run",zone:"under30",designer:"William Newcomb",type:"Resort",fee:115,rating:8.0,drive:"10 min east",url:"https://www.grandtraverseresort.com/golf"},
+    {name:"Grand Traverse Resort — Bear Course",zone:"under30",designer:"Jack Nicklaus",type:"Resort",fee:165,rating:9.0,drive:"10 min east",url:"https://www.grandtraverseresort.com/golf"},
+    {name:"High Pointe Golf Club",zone:"30to60",designer:"Tom Doak",type:"Public",fee:95,rating:8.8,drive:"40 min east",url:"https://www.highpointegolf.com"},
+    {name:"Shanty Creek — Legend Course",zone:"1to2hr",designer:"Arnold Palmer",type:"Resort",fee:125,rating:8.5,drive:"1 hr southeast",url:"https://www.shantycreek.com/golf"},
+    {name:"Crystal Lake Golf Club",zone:"under30",designer:"Unknown",type:"Semi-Private",fee:60,rating:7.5,drive:"20 min",url:"https://crystallakegolf.com"},
+    {name:"Manistee National Golf & Resort",zone:"1to2hr",designer:"Unknown",type:"Public",fee:75,rating:7.8,drive:"1 hr south",url:"https://manisteenatinal.com"},
+    {name:"Elk Ridge Golf Course",zone:"30to60",designer:"Unknown",type:"Public",fee:55,rating:7.0,drive:"45 min",url:"https://www.elkridgegolf.com"}
+  ],
+
+  "whistling-straits": [
+    {name:"Whistling Straits — Straits Course",zone:"on-site",designer:"Pete Dye",type:"Resort — 2021 Ryder Cup",fee:395,rating:10.0,drive:"On property",url:"https://www.destinationkohler.com/golf/whistling-straits"},
+    {name:"Whistling Straits — Irish Course",zone:"on-site",designer:"Pete Dye",type:"Resort",fee:295,rating:9.3,drive:"On property",url:"https://www.destinationkohler.com/golf/whistling-straits"},
+    {name:"Blackwolf Run — River Course",zone:"under30",designer:"Pete Dye",type:"Resort — Top 10 in WI",fee:195,rating:9.5,drive:"15 min (Kohler)",url:"https://www.destinationkohler.com/golf/blackwolf-run"},
+    {name:"Blackwolf Run — Meadow Valleys",zone:"under30",designer:"Pete Dye",type:"Resort",fee:195,rating:9.0,drive:"15 min (Kohler)",url:"https://www.destinationkohler.com/golf/blackwolf-run"},
+    {name:"Bull at Pinehurst Farms",zone:"30to60",designer:"Pete Dye",type:"Semi-Private",fee:115,rating:8.5,drive:"35 min south",url:"https://thebull.golf"},
+    {name:"The Bog Golf Course",zone:"1to2hr",designer:"Arnold Palmer",type:"Public",fee:85,rating:8.3,drive:"1 hr 15 min south",url:"https://www.theboggolf.com"},
+    {name:"Erin Hills",zone:"1to2hr",designer:"Hurdzan / Fry / Shunkwiler",type:"Public — 2017 US Open",fee:125,rating:9.4,drive:"1 hr 30 min south",url:"https://www.erinhills.com"},
+    {name:"Brown Deer Park Golf Course",zone:"1to2hr",designer:"George Hansen",type:"Public (Milwaukee)",fee:45,rating:7.5,drive:"1 hr 40 min south",url:"https://county.milwaukee.gov/browndeer"},
+    {name:"Quit Qui Oc Golf Course",zone:"30to60",designer:"Unknown",type:"Public",fee:35,rating:6.8,drive:"40 min west",url:"https://www.quitquioc.com"}
+  ],
+
+  "kelowna": [
+    {name:"Predator Ridge — Predator Course",zone:"30to60",designer:"Les Furber",type:"Resort",fee:155,rating:9.5,drive:"30 min north (Vernon)",url:"https://www.predatorridge.com/golf"},
+    {name:"Predator Ridge — Ridge Course",zone:"30to60",designer:"Doug Carrick",type:"Resort",fee:145,rating:9.2,drive:"30 min north (Vernon)",url:"https://www.predatorridge.com/golf"},
+    {name:"Gallagher's Canyon Golf Club",zone:"under30",designer:"Bill Robinson / Les Furber",type:"Semi-Private",fee:105,rating:8.8,drive:"15 min southeast",url:"https://www.gallagherscanyon.com"},
+    {name:"The Rise Golf Club",zone:"under30",designer:"Fred Couples / Gene Bates",type:"Public",fee:115,rating:8.5,drive:"20 min north",url:"https://www.therisegolf.ca"},
+    {name:"Harvest Golf Club",zone:"under30",designer:"Graham Cooke",type:"Public",fee:85,rating:8.0,drive:"15 min northeast",url:"https://www.harvestgolf.com"},
+    {name:"Tower Ranch Golf Club",zone:"under30",designer:"Thomas McBroom",type:"Public",fee:75,rating:8.2,drive:"20 min north",url:"https://www.towerranchgolf.com"},
+    {name:"Okanagan Golf Club — Bear Course",zone:"under30",designer:"Graham Cooke",type:"Public",fee:90,rating:8.3,drive:"20 min north",url:"https://okanagangolfclub.com"},
+    {name:"Okanagan Golf Club — Quail Course",zone:"under30",designer:"Graham Cooke",type:"Public",fee:75,rating:7.8,drive:"20 min north",url:"https://okanagangolfclub.com"},
+    {name:"Tobiano Golf Course",zone:"1to2hr",designer:"Thomas McBroom",type:"Public",fee:90,rating:9.0,drive:"1 hr 30 min north (Kamloops)",url:"https://www.tobianobc.com/golf"}
+  ],
+
+  "kamloops": [
+    {name:"Tobiano Golf Course",zone:"under30",designer:"Thomas McBroom",type:"Public — #1 in BC",fee:90,rating:9.0,drive:"20 min west",url:"https://www.tobianobc.com/golf"},
+    {name:"Talking Rock Golf Course",zone:"under30",designer:"Graham Cooke",type:"Resort",fee:80,rating:8.5,drive:"20 min south",url:"https://www.talkingrock.ca/golf"},
+    {name:"Rivershore Estates Golf Links",zone:"under30",designer:"Robert Trent Jones Sr.",type:"Public",fee:65,rating:8.0,drive:"15 min east",url:"https://rivershoregolf.com"},
+    {name:"Sun Peaks Resort Golf Club",zone:"1to2hr",designer:"Graham Cooke",type:"Resort",fee:85,rating:8.0,drive:"50 min northeast",url:"https://www.sunpeaksresort.com/golf"},
+    {name:"Pineridge Golf Course",zone:"under30",designer:"Unknown",type:"Public",fee:40,rating:6.5,drive:"10 min north",url:"https://www.pineridgegolf.ca"},
+    {name:"Sagebrush Golf & Sporting Club",zone:"1to2hr",designer:"Thomas McBroom",type:"Private — May have access",fee:175,rating:9.5,drive:"2 hr south (Quilchena)",url:"https://sagebrushgolf.com"}
+  ],
+
+  "gamble-sands": [
+    {name:"Gamble Sands",zone:"on-site",designer:"Coore & Crenshaw",type:"Public — Walking Only",fee:195,rating:9.5,drive:"On property (Brewster)",url:"https://www.gamblesands.com"},
+    {name:"Desert Aire Golf Course",zone:"30to60",designer:"Unknown",type:"Public",fee:35,rating:6.5,drive:"30 min south",url:"https://www.desertaire.com/golf"},
+    {name:"Three Lakes Golf Course",zone:"over2hr",designer:"Unknown",type:"Public",fee:30,rating:6.0,drive:"2 hr 30 min west (Wenatchee area)",url:"https://www.threelakesgolf.com"},
+    {name:"Leavenworth Golf Club",zone:"over2hr",designer:"Unknown",type:"Public",fee:45,rating:7.0,drive:"2 hr west",url:"https://www.leavenworthgolf.com"},
+    {name:"Bear Creek Country Club (Medina)",zone:"over2hr",designer:"Unknown",type:"Semi-Private",fee:95,rating:7.5,drive:"2 hr 45 min west (Seattle area)",url:"#"}
+  ],
+
+  "mesquite": [
+    {name:"Wolf Creek Golf Club",zone:"under30",designer:"Dennis Rider",type:"Public — Most Dramatic in NV",fee:145,rating:9.5,drive:"15 min north",url:"https://golfwolfcreek.com"},
+    {name:"Conestoga Golf Club",zone:"on-site",designer:"Cal Olson",type:"Public",fee:95,rating:8.5,drive:"On property (Casablanca)",url:"https://www.visitvirginvalley.com/conestoga"},
+    {name:"CasaBlanca Golf Club",zone:"on-site",designer:"Cal Olson",type:"Resort",fee:85,rating:8.0,drive:"On property",url:"https://casablancaresort.com/golf"},
+    {name:"Falcon Ridge Golf Course",zone:"under30",designer:"Keith Foster",type:"Public",fee:60,rating:7.8,drive:"10 min",url:"https://www.falconridgegolf.com"},
+    {name:"Oasis Golf Club",zone:"under30",designer:"Arnold Palmer",type:"Public",fee:95,rating:8.2,drive:"15 min",url:"https://www.oasisgolfclub.com"},
+    {name:"Palms Golf Club (Mesquite)",zone:"under30",designer:"Gary Panks",type:"Public",fee:55,rating:7.5,drive:"10 min",url:"#"},
+    {name:"Coral Canyon Golf Course (St George)",zone:"1to2hr",designer:"Keith Foster",type:"Public",fee:85,rating:8.5,drive:"1 hr west",url:"https://www.coralcanyongolf.com"},
+    {name:"Sand Hollow Resort",zone:"1to2hr",designer:"John Fought",type:"Public",fee:140,rating:9.0,drive:"1 hr west",url:"https://sandhollowresort.com"}
+  ],
+
+  "bandon-dunes": [
+    {name:"Sheep Ranch",zone:"on-site",designer:"Bill Coore & Ben Crenshaw",type:"Resort — Ocean Views",fee:350,rating:10.0,drive:"On property",url:"https://www.bandondunesgolf.com/golf-courses/sheep-ranch"},
+    {name:"Pacific Dunes",zone:"on-site",designer:"Tom Doak",type:"Resort — Walking Only",fee:325,rating:9.8,drive:"On property",url:"https://www.bandondunesgolf.com/golf-courses/pacific-dunes"},
+    {name:"Bandon Dunes",zone:"on-site",designer:"David McLay Kidd",type:"Resort — Walking Only",fee:295,rating:9.7,drive:"On property",url:"https://www.bandondunesgolf.com/golf-courses/bandon-dunes"},
+    {name:"Old Macdonald",zone:"on-site",designer:"Tom Doak & Jim Urbina",type:"Resort — Walking Only",fee:295,rating:9.5,drive:"On property",url:"https://www.bandondunesgolf.com/golf-courses/old-macdonald"},
+    {name:"Bandon Trails",zone:"on-site",designer:"Coore & Crenshaw",type:"Resort — Forest Layout",fee:275,rating:9.3,drive:"On property",url:"https://www.bandondunesgolf.com/golf-courses/bandon-trails"},
+    {name:"Bandon Preserve (par-3)",zone:"on-site",designer:"Tom Doak",type:"Resort — 13 Holes",fee:75,rating:9.0,drive:"On property",url:"https://www.bandondunesgolf.com/golf-courses/bandon-preserve"},
+    {name:"Spinreel Dune Buggy",zone:"under30",designer:"N/A",type:"Dune buggy — not golf",fee:0,rating:0,drive:"15 min north",url:"#"},
+    {name:"Coos Country Club",zone:"1to2hr",designer:"Unknown",type:"Semi-Private",fee:50,rating:6.8,drive:"1 hr north (Coos Bay)",url:"#"},
+    {name:"Forest Hills Golf Course",zone:"1to2hr",designer:"Unknown",type:"Public",fee:40,rating:6.5,drive:"1 hr north (Reedsport)",url:"#"}
+  ],
+
+  "boise": [
+    {name:"Osprey Meadows at Tamarack Resort",zone:"over2hr",designer:"Robert Trent Jones Jr.",type:"Resort — #1 in Idaho",fee:135,rating:9.3,drive:"2 hr north",url:"https://tamarackidaho.com/golf-osprey-meadows"},
+    {name:"BanBury Golf Course",zone:"under30",designer:"Unknown",type:"Public",fee:55,rating:7.8,drive:"15 min north",url:"https://banburygolf.com"},
+    {name:"Quail Hollow Golf Course",zone:"under30",designer:"Unknown",type:"Public",fee:45,rating:7.2,drive:"20 min northeast",url:"#"},
+    {name:"Boise Ranch Golf Course",zone:"under30",designer:"Unknown",type:"Public",fee:40,rating:7.0,drive:"20 min east",url:"#"},
+    {name:"Warm Springs Golf Course",zone:"on-site",designer:"Unknown",type:"Public (Boise)",fee:35,rating:6.8,drive:"10 min from downtown",url:"https://www.warmspringsgolfcourse.com"},
+    {name:"Falcon Crest Golf Club",zone:"under30",designer:"Unknown",type:"Semi-Private",fee:65,rating:8.0,drive:"25 min west (Kuna)",url:"https://www.falconcrestgolf.com"},
+    {name:"Purple Sage Golf Course",zone:"under30",designer:"Unknown",type:"Public",fee:38,rating:6.5,drive:"25 min",url:"#"},
+    {name:"Crane Creek Country Club",zone:"under30",designer:"Unknown",type:"Semi-Private",fee:75,rating:7.5,drive:"20 min",url:"#"},
+    {name:"Circling Raven Golf Club",zone:"1to2hr",designer:"Gene Bates",type:"Public (Casino)",fee:85,rating:8.5,drive:"1 hr north (Plummer)",url:"https://www.cdacasino.com/golf"}
+  ],
+
+  "austin": [
+    {name:"Barton Creek — Fazio Canyons",zone:"under30",designer:"Tom Fazio",type:"Resort — #1 in TX",fee:195,rating:9.3,drive:"20 min west",url:"https://www.omnihotels.com/hotels/austin-barton-creek/golf"},
+    {name:"Barton Creek — Fazio Foothills",zone:"under30",designer:"Tom Fazio",type:"Resort",fee:175,rating:9.0,drive:"20 min west",url:"https://www.omnihotels.com/hotels/austin-barton-creek/golf"},
+    {name:"The Golf Club at Escondido",zone:"1to2hr",designer:"Tom Fazio",type:"Private — Check Access",fee:0,rating:9.5,drive:"1 hr north (Horseshoe Bay)",url:"#"},
+    {name:"Barton Creek — Coore & Crenshaw",zone:"under30",designer:"Coore & Crenshaw",type:"Resort",fee:165,rating:9.1,drive:"20 min west",url:"https://www.omnihotels.com/hotels/austin-barton-creek/golf"},
+    {name:"Horseshoe Bay Resort — Apple Rock",zone:"1to2hr",designer:"Robert Trent Jones Sr.",type:"Resort",fee:125,rating:8.5,drive:"1 hr northwest",url:"https://www.hsbresort.com/golf"},
+    {name:"Wolfdancer Golf Club (Hyatt Regency)",zone:"30to60",designer:"Arthur Hills",type:"Resort",fee:145,rating:8.8,drive:"35 min east (Lost Pines)",url:"https://www.hyatt.com/en-US/hotel/texas/hyatt-regency-lost-pines-resort-and-spa"},
+    {name:"Falconhead Golf Club",zone:"under30",designer:"Bill Bergin",type:"Public",fee:75,rating:7.8,drive:"25 min west",url:"https://www.falconheadgolf.com"},
+    {name:"Avery Ranch Golf Club",zone:"under30",designer:"Andy Raugust",type:"Public",fee:65,rating:7.5,drive:"25 min northwest",url:"https://www.averyranchgolf.com"},
+    {name:"Colovista Country Club",zone:"over2hr",designer:"Unknown",type:"Semi-Private",fee:55,rating:7.0,drive:"2 hr east (Bastrop)",url:"#"}
+  ],
+
+  "sand-valley": [
+    {name:"Mammoth Dunes",zone:"on-site",designer:"David McLay Kidd",type:"Resort — Top 10 Public USA",fee:245,rating:9.8,drive:"On property",url:"https://www.sandvalley.com/golf-courses/mammoth-dunes"},
+    {name:"Sand Valley",zone:"on-site",designer:"Coore & Crenshaw",type:"Resort — Top 10 Public USA",fee:225,rating:9.6,drive:"On property",url:"https://www.sandvalley.com/golf-courses/sand-valley"},
+    {name:"Sedge Valley",zone:"on-site",designer:"Coore & Crenshaw",type:"Resort — Links Style",fee:175,rating:9.3,drive:"On property",url:"https://www.sandvalley.com/golf-courses/sedge-valley"},
+    {name:"The Lido",zone:"on-site",designer:"Coore & Crenshaw (recreation)",type:"Resort — Historic Recreation",fee:185,rating:9.4,drive:"On property",url:"https://www.sandvalley.com/golf-courses/the-lido"},
+    {name:"The Sandbox (par-3)",zone:"on-site",designer:"Coore & Crenshaw",type:"Resort",fee:35,rating:8.5,drive:"On property",url:"https://www.sandvalley.com/golf-courses"},
+    {name:"Stevens Point Country Club",zone:"1to2hr",designer:"Unknown",type:"Semi-Private",fee:45,rating:6.5,drive:"1 hr east",url:"#"},
+    {name:"SentryWorld Golf Course",zone:"1to2hr",designer:"Robert Trent Jones Jr.",type:"Public",fee:85,rating:8.5,drive:"1 hr east",url:"https://www.sentryworld.com"}
+  ],
+
+  "french-lick": [
+    {name:"French Lick — Pete Dye Course",zone:"on-site",designer:"Pete Dye",type:"Resort — #1 in Indiana",fee:225,rating:9.5,drive:"On property",url:"https://www.frenchlick.com/golf/courses/pete-dye"},
+    {name:"French Lick — Donald Ross Course",zone:"on-site",designer:"Donald Ross (1917)",type:"Resort — Historic",fee:145,rating:8.8,drive:"On property",url:"https://www.frenchlick.com/golf/courses/donald-ross"},
+    {name:"Valley Links",zone:"on-site",designer:"Unknown",type:"Resort — 9-hole",fee:55,rating:6.5,drive:"On property",url:"https://www.frenchlick.com/golf"},
+    {name:"Sultan's Run Golf Club",zone:"1to2hr",designer:"Pete Dye",type:"Public",fee:85,rating:8.3,drive:"1 hr west (Jasper)",url:"https://www.sultansrun.com"},
+    {name:"Victoria National Golf Club",zone:"1to2hr",designer:"Tom Fazio",type:"Private — Check Access",fee:0,rating:9.8,drive:"1 hr 45 min west (Newburgh)",url:"https://victorianational.com"},
+    {name:"Avalon Golf Club",zone:"1to2hr",designer:"Unknown",type:"Public",fee:55,rating:7.0,drive:"1 hr north",url:"#"},
+    {name:"Perfect Lie Golf Center",zone:"under30",designer:"N/A",type:"Practice",fee:20,rating:0,drive:"10 min",url:"#"}
+  ],
+
+  "myrtle-beach": [
+    {name:"Caledonia Golf & Fish Club",zone:"under30",designer:"Mike Strantz",type:"Public — #1 in MB",fee:165,rating:9.7,drive:"20 min south (Pawleys Island)",url:"https://www.caledoniagolfandfishclub.com"},
+    {name:"True Blue Plantation",zone:"under30",designer:"Mike Strantz",type:"Public",fee:145,rating:9.5,drive:"20 min south",url:"https://www.truebluegolf.com"},
+    {name:"TPC Myrtle Beach",zone:"under30",designer:"Tom Fazio",type:"Public",fee:125,rating:9.3,drive:"10 min south",url:"https://www.tpcmyrtlebeach.com"},
+    {name:"Dunes Golf & Beach Club",zone:"under30",designer:"Robert Trent Jones Sr.",type:"Semi-Private",fee:115,rating:9.2,drive:"10 min north",url:"https://thedunes.com"},
+    {name:"Pawleys Plantation Golf Club",zone:"30to60",designer:"Jack Nicklaus",type:"Semi-Private",fee:105,rating:8.8,drive:"30 min south",url:"https://www.pawleysplantation.com"},
+    {name:"Heritage Club at Pawleys Island",zone:"30to60",designer:"Dan Maples",type:"Public",fee:85,rating:8.2,drive:"25 min south",url:"#"},
+    {name:"Barefoot Resort — Love Course",zone:"under30",designer:"Davis Love III",type:"Public",fee:95,rating:8.5,drive:"10 min north",url:"https://www.barefootgolf.com"},
+    {name:"Barefoot Resort — Dye Course",zone:"under30",designer:"Pete Dye",type:"Public",fee:100,rating:8.7,drive:"10 min north",url:"https://www.barefootgolf.com"},
+    {name:"Pine Lakes Country Club",zone:"under30",designer:"Robert White",type:"Semi-Private — Oldest in SC",fee:85,rating:8.0,drive:"5 min",url:"https://pinelakescc.com"},
+    {name:"Prestwick Country Club",zone:"under30",designer:"Unknown",type:"Semi-Private",fee:70,rating:7.5,drive:"15 min",url:"#"}
+  ],
+
+  "reynolds-lake-oconee": [
+    {name:"Reynolds — Great Waters",zone:"on-site",designer:"Jack Nicklaus",type:"Resort — #1 on Property",fee:205,rating:9.5,drive:"On property",url:"https://www.reynoldslakeoconee.com/golf"},
+    {name:"Reynolds — National Crabapple",zone:"on-site",designer:"Tom Fazio",type:"Resort",fee:195,rating:9.3,drive:"On property",url:"https://www.reynoldslakeoconee.com/golf"},
+    {name:"Reynolds — Oconee Course",zone:"on-site",designer:"Rees Jones",type:"Resort",fee:175,rating:8.8,drive:"On property",url:"https://www.reynoldslakeoconee.com/golf"},
+    {name:"Reynolds — Landing Course",zone:"on-site",designer:"Bob Cupp",type:"Resort",fee:165,rating:8.5,drive:"On property",url:"https://www.reynoldslakeoconee.com/golf"},
+    {name:"Reynolds — Creek Club",zone:"on-site",designer:"Jim Engh",type:"Resort — Members Only",fee:185,rating:9.0,drive:"On property",url:"https://www.reynoldslakeoconee.com/golf"},
+    {name:"The Preserve Course",zone:"on-site",designer:"Tom Fazio",type:"Resort",fee:175,rating:8.7,drive:"On property",url:"https://www.reynoldslakeoconee.com/golf"},
+    {name:"Hawks Ridge Golf Club",zone:"over2hr",designer:"Unknown",type:"Private",fee:0,rating:8.0,drive:"2 hr north (Atlanta area)",url:"#"},
+    {name:"Stone Mountain Golf Course",zone:"over2hr",designer:"John LaFoy",type:"Public",fee:55,rating:7.5,drive:"1 hr 30 min north (Atlanta)",url:"https://stonemountainpark.com/golf"}
+  ],
+
+  "streamsong": [
+    {name:"Streamsong Black",zone:"on-site",designer:"Gil Hanse",type:"Resort — #1 on Property",fee:295,rating:9.8,drive:"On property",url:"https://www.streamsongresort.com/golf/black"},
+    {name:"Streamsong Red",zone:"on-site",designer:"Coore & Crenshaw",type:"Resort",fee:265,rating:9.6,drive:"On property",url:"https://www.streamsongresort.com/golf/red"},
+    {name:"Streamsong Blue",zone:"on-site",designer:"Hurdzan / Fry",type:"Resort",fee:265,rating:9.4,drive:"On property",url:"https://www.streamsongresort.com/golf/blue"},
+    {name:"Streamsong Black Reserve",zone:"on-site",designer:"Gil Hanse",type:"Resort — New 9-hole",fee:165,rating:9.2,drive:"On property",url:"https://www.streamsongresort.com/golf"},
+    {name:"Concession Golf Club",zone:"1to2hr",designer:"Jack Nicklaus / Tony Jacklin",type:"Private — Check Access",fee:0,rating:9.5,drive:"1 hr 15 min north (Bradenton)",url:"https://www.theconcessiongolf.com"},
+    {name:"World Woods — Rolling Oaks",zone:"1to2hr",designer:"Tom Fazio",type:"Public",fee:95,rating:8.8,drive:"1 hr north (Brooksville)",url:"https://www.worldwoodsgolf.com"},
+    {name:"World Woods — Pine Barrens",zone:"1to2hr",designer:"Tom Fazio",type:"Public",fee:95,rating:9.0,drive:"1 hr north",url:"https://www.worldwoodsgolf.com"},
+    {name:"Panther Lake at ChampionsGate",zone:"1to2hr",designer:"Greg Norman",type:"Public",fee:85,rating:8.0,drive:"1 hr 20 min northeast",url:"https://www.championsgatecountryclub.com"}
+  ],
+
+  "kiawah-island": [
+    {name:"The Ocean Course",zone:"on-site",designer:"Pete Dye — 2021 PGA Champ.",type:"Resort — Walking Only",fee:425,rating:10.0,drive:"On property",url:"https://kiawahresort.com/golf/ocean-course/"},
+    {name:"Osprey Point Golf Course",zone:"on-site",designer:"Tom Fazio",type:"Resort",fee:235,rating:8.8,drive:"On property",url:"https://kiawahresort.com/golf/osprey-point-golf-course/"},
+    {name:"Turtle Point Golf Course",zone:"on-site",designer:"Jack Nicklaus",type:"Resort",fee:235,rating:8.7,drive:"On property",url:"https://kiawahresort.com/golf/turtle-point-golf-course/"},
+    {name:"Cougar Point Golf Course",zone:"on-site",designer:"Gary Player",type:"Resort",fee:200,rating:8.3,drive:"On property",url:"https://kiawahresort.com/golf/cougar-point-golf-course/"},
+    {name:"Oak Point Golf Course",zone:"on-site",designer:"Clyde Johnston",type:"Resort",fee:175,rating:8.0,drive:"On property",url:"https://kiawahresort.com/golf/oak-point-golf-course/"},
+    {name:"The River Course (Seabrook Island)",zone:"under30",designer:"Willard Byrd",type:"Semi-Private",fee:115,rating:8.0,drive:"15 min north",url:"https://www.seabrookisland.com/golf"},
+    {name:"Links at Stono Ferry",zone:"under30",designer:"Ron Garl",type:"Public",fee:85,rating:7.8,drive:"20 min north",url:"https://stonoferry.com/golf"},
+    {name:"Shadowmoss Plantation Golf Club",zone:"30to60",designer:"Porter Gibson",type:"Public",fee:65,rating:7.5,drive:"40 min north (Charleston)",url:"https://www.shadowmossgolf.com"},
+    {name:"Wild Dunes — Links Course",zone:"1to2hr",designer:"Tom Fazio",type:"Resort",fee:165,rating:8.5,drive:"1 hr north (Isle of Palms)",url:"https://www.wilddunes.com/golf"}
+  ],
+
+  "pinehurst": [
+    {name:"Pinehurst No. 2",zone:"on-site",designer:"Donald Ross — US Open site",type:"Resort — Walking Only",fee:395,rating:10.0,drive:"On property",url:"https://www.pinehurst.com/golf/courses/no-2/"},
+    {name:"Pinehurst No. 4",zone:"on-site",designer:"Donald Ross / Gil Hanse",type:"Resort",fee:325,rating:9.5,drive:"On property",url:"https://www.pinehurst.com/golf/courses/no-4/"},
+    {name:"Pinehurst No. 8",zone:"on-site",designer:"Tom Fazio",type:"Resort",fee:295,rating:9.3,drive:"On property",url:"https://www.pinehurst.com/golf/courses/no-8/"},
+    {name:"Pinehurst No. 6",zone:"on-site",designer:"Tom Fazio",type:"Resort",fee:245,rating:9.0,drive:"On property",url:"https://www.pinehurst.com/golf/courses/no-6/"},
+    {name:"Pinehurst No. 7",zone:"on-site",designer:"Rees Jones",type:"Resort",fee:245,rating:8.8,drive:"On property",url:"https://www.pinehurst.com/golf/courses/no-7/"},
+    {name:"Mid Pines Inn & Golf Club",zone:"under30",designer:"Donald Ross (1921)",type:"Resort",fee:175,rating:9.2,drive:"5 min",url:"https://www.midpinesinn.com/golf"},
+    {name:"Pine Needles Lodge & Golf Club",zone:"under30",designer:"Donald Ross (1927)",type:"Resort",fee:175,rating:9.1,drive:"5 min",url:"https://www.pineneedles-midpines.com/golf"},
+    {name:"Country Club of North Carolina",zone:"under30",designer:"Ellis Maples / Willard Byrd",type:"Private",fee:0,rating:9.0,drive:"10 min",url:"#"},
+    {name:"Tobacco Road Golf Club",zone:"30to60",designer:"Mike Strantz",type:"Public — Most Unusual in NC",fee:95,rating:9.3,drive:"45 min north",url:"https://www.tobaccoroadgolf.com"},
+    {name:"Dormie Club",zone:"30to60",designer:"Coore & Crenshaw",type:"Private — Check Access",fee:0,rating:9.6,drive:"30 min north",url:"https://www.dormieclub.com"}
+  ],
+
+  "palm-springs": [
+    {name:"PGA West — Stadium Course (TPC)",zone:"30to60",designer:"Pete Dye — Former Bob Hope host",type:"Resort",fee:295,rating:9.5,drive:"30 min south (La Quinta)",url:"https://www.pgawest.com"},
+    {name:"PGA West — Jack Nicklaus Tournament",zone:"30to60",designer:"Jack Nicklaus",type:"Resort",fee:245,rating:9.2,drive:"30 min south",url:"https://www.pgawest.com"},
+    {name:"La Quinta — Mountain Course",zone:"30to60",designer:"Pete Dye",type:"Resort",fee:195,rating:9.0,drive:"30 min south",url:"https://www.laquintaresort.com/golf"},
+    {name:"Desert Willow — Firecliff Course",zone:"30to60",designer:"Michael Hurdzan",type:"Public",fee:125,rating:8.7,drive:"25 min south (Palm Desert)",url:"https://www.desertwillow.com"},
+    {name:"Shadow Ridge Golf Club",zone:"under30",designer:"Arnold Palmer",type:"Resort",fee:145,rating:8.5,drive:"15 min north",url:"https://www.shadowridgegolf.com"},
+    {name:"Indian Wells Golf Resort — Celebrity",zone:"under30",designer:"Clive Clark",type:"Public",fee:115,rating:8.2,drive:"20 min southeast",url:"https://www.indianwellsgolfresort.com"},
+    {name:"Escena Golf Club",zone:"under30",designer:"Ted Robinson Jr.",type:"Public",fee:75,rating:7.5,drive:"10 min",url:"https://escenagolf.com"},
+    {name:"Tahquitz Creek Golf Resort",zone:"under30",designer:"David Rainville",type:"Public",fee:65,rating:7.3,drive:"5 min",url:"https://tahquitzcreek.com"},
+    {name:"Coachella Valley Golf — Coral Mountain",zone:"30to60",designer:"Jack Nicklaus",type:"Private — Future public",fee:0,rating:9.5,drive:"35 min south",url:"#"}
+  ],
+
+  "st-george": [
+    {name:"Sand Hollow Resort — Championship",zone:"under30",designer:"John Fought",type:"Public — #1 in Utah",fee:145,rating:9.5,drive:"15 min northeast",url:"https://sandhollowresort.com/golf-courses/championship-course/"},
+    {name:"Sand Hollow — Outlaw Course",zone:"under30",designer:"John Fought",type:"Public",fee:85,rating:8.5,drive:"15 min northeast",url:"https://sandhollowresort.com/golf-courses/outlaw-course/"},
+    {name:"Entrada at Snow Canyon Country Club",zone:"under30",designer:"Johnny Miller",type:"Semi-Private",fee:125,rating:9.2,drive:"15 min north",url:"https://www.entradaclub.com/golf"},
+    {name:"Copper Rock Golf Course",zone:"under30",designer:"John Fought",type:"Public",fee:115,rating:9.0,drive:"15 min north",url:"https://copperrock.com/golf"},
+    {name:"Sky Mountain Golf Course",zone:"under30",designer:"Greg Nash",type:"Public",fee:65,rating:8.0,drive:"10 min northwest (Hurricane)",url:"https://www.skymountaingc.com"},
+    {name:"Red Hills Golf Course",zone:"under30",designer:"Red Ainsworth",type:"Public",fee:45,rating:7.2,drive:"5 min north",url:"https://www.redhillsgolfcourse.com"},
+    {name:"Coral Canyon Golf Course",zone:"under30",designer:"Keith Foster",type:"Public",fee:85,rating:8.8,drive:"20 min northwest",url:"https://www.coralcanyongolf.com"},
+    {name:"Wolf Creek Golf Club (Mesquite NV)",zone:"1to2hr",designer:"Dennis Rider",type:"Public",fee:145,rating:9.5,drive:"1 hr 30 min east",url:"https://golfwolfcreek.com"},
+    {name:"Zion Mountain Ranch Golf",zone:"1to2hr",designer:"Unknown",type:"Resort",fee:55,rating:7.0,drive:"1 hr east",url:"#"}
+  ]
+
+}; // end COURSE_DETAIL
+
+// ═══════════════════════════════════════════════════════════
+//  WEATHER DATA  (monthly avg highs in °F)
+// ═══════════════════════════════════════════════════════════
+var WEATHER = {
+  "central-oregon":       [42,47,54,62,70,79,87,86,77,63,48,40],
+  "coeur-dalene":         [36,42,51,60,69,78,85,84,73,58,42,34],
+  "traverse-city":        [28,32,42,56,67,76,80,78,70,58,44,31],
+  "whistling-straits":    [28,32,42,55,65,75,78,77,69,57,43,30],
+  "kelowna":              [36,42,52,63,72,81,90,88,78,62,44,34],
+  "kamloops":             [38,46,57,67,76,86,95,93,80,63,45,35],
+  "gamble-sands":         [38,46,57,68,79,89,95,93,82,66,48,36],
+  "mesquite":             [60,66,74,83,94,104,107,104,97,83,68,58],
+  "bandon-dunes":         [52,55,57,60,62,64,65,65,63,58,54,50],
+  "boise":                [38,46,55,64,74,84,96,95,83,66,48,36],
+  "austin":               [60,64,72,79,87,94,100,100,94,82,70,60],
+  "sand-valley":          [26,31,43,57,68,78,81,79,71,59,44,28],
+  "french-lick":          [40,45,55,66,75,83,88,87,80,68,55,42],
+  "myrtle-beach":         [58,62,68,75,82,88,89,88,83,74,66,58],
+  "reynolds-lake-oconee": [55,60,68,76,84,91,93,92,85,74,64,55],
+  "streamsong":           [72,75,79,84,89,92,92,92,90,84,77,71],
+  "kiawah-island":        [58,62,68,75,82,88,90,89,83,74,66,57],
+  "pinehurst":            [52,56,64,73,80,87,91,89,82,72,63,53],
+  "palm-springs":         [69,73,80,88,97,106,109,107,100,88,76,67],
+  "st-george":            [52,58,66,75,84,94,104,101,92,78,63,51]
+};
+
+var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function tempIcon(t) {
+  if (t >= 100) return "🔥";
+  if (t >= 90)  return "☀️";
+  if (t >= 75)  return "🌤️";
+  if (t >= 60)  return "⛅";
+  return "❄️";
+}
+function tempColor(t) {
+  if (t >= 100) return "#ef4444";
+  if (t >= 90)  return "#f97316";
+  if (t >= 80)  return "#eab308";
+  if (t >= 65)  return "#22c55e";
+  return "#3b82f6";
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BEST_FOR labels
+// ═══════════════════════════════════════════════════════════
+var BEST_FOR = {
+  "central-oregon":       "Best All-Around Western Trip",
+  "bandon-dunes":         "Top Golf Experience in America",
+  "coeur-dalene":         "Best Mountain-Lake Setting",
+  "gamble-sands":         "Best Under-the-Radar Pilgrimage",
+  "st-george":            "Most Dramatic Red-Rock Scenery",
+  "kelowna":              "Best Wine-Country Golf Value",
+  "mesquite":             "Most Visually Insane Course",
+  "palm-springs":         "Best Desert Glamour Experience",
+  "boise":                "Best Budget Western Option",
+  "kamloops":             "Cheapest Green Fees on the List",
+  "traverse-city":        "Best Value for East-Coast Crews",
+  "whistling-straits":    "Top Bucket-List Ryder Cup Site",
+  "sand-valley":          "Wisconsin's Answer to Bandon",
+  "kiawah-island":        "Most Prestigious Ocean-Links",
+  "streamsong":           "Wildest Golf Landscape in the US",
+  "pinehurst":            "Golf's Ancestral Home",
+  "reynolds-lake-oconee": "Best-Value Southeast Luxury",
+  "myrtle-beach":         "Best Party + Golf Combo Value",
+  "french-lick":          "Best Self-Contained Midwest Resort",
+  "austin":               "Best Nightlife + Golf Combo"
+};
+
+// ═══════════════════════════════════════════════════════════
+//  HUB logic
+// ═══════════════════════════════════════════════════════════
+function setHub(hub, btn) {
+  currentHub = hub;
+  document.querySelectorAll('.hub-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  if (dest) refreshCostUI();
+}
+
+function refreshCostUI() {
+  var d = dest;
+  var opts = {hub: currentHub, nights:4, rounds:3, groupSize:8, lodgingTier:'mid'};
+  var total = window.getTotal(d, opts);
+
+  // stat bar cost
+  document.getElementById('sbCost').textContent = '$' + total;
+
+  // flight table highlight
+  document.querySelectorAll('.flight-table tr[data-hub]').forEach(function(tr) {
+    tr.classList.toggle('hub-highlight', tr.getAttribute('data-hub') === currentHub);
+  });
+
+  // breakdown
+  document.getElementById('breakdownHubLabel').textContent = '(from ' + currentHub + ')';
+  document.getElementById('costTotalNum').textContent = '$' + total;
+  renderCostBars(d, opts, total);
+
+  // calc link
+  document.getElementById('calcLink').href = 'calculator.html#dest=' + d.id + '&hub=' + currentHub;
+  // render course selector
+  renderCourseSelector(d);
+}
+
+function renderCourseSelector(d) {
+  var container = document.getElementById('courseSelectorList');
+  if (!container) return;
+  // Build list of all courses with their fees (use COURSE_DETAIL if available)
+  var courseItems = d.courses.map(function(cname) {
+    var detail = COURSE_DETAIL.find(function(c){ return c.name === cname; });
+    var fee = detail ? detail.fee : d.golfPerRound;
+    return { name: cname, fee: fee };
+  });
+  container.innerHTML = courseItems.map(function(c, i) {
+    return '<label class="course-sel-item" for="csc-' + i + '">' +
+      '<input type="checkbox" class="course-sel-cb" id="csc-' + i + '" ' +
+             'data-course="' + c.name.replace(/"/g, '&quot;') + '" ' +
+             'data-fee="' + c.fee + '">' +
+      '<span class="course-sel-name">' + c.name + '</span>' +
+      '<span class="course-sel-fee">$' + c.fee + '/rd</span>' +
+    '</label>';
+  }).join('');
+}
+
+function addCoursesToCalculator() {
+  var checks = document.querySelectorAll('.course-sel-cb:checked');
+  if (checks.length === 0) { alert('Select at least one course first.'); return; }
+  var courses = Array.from(checks).map(function(cb) {
+    return cb.getAttribute('data-course') + ':$' + cb.getAttribute('data-fee');
+  });
+  var d = getCurrentDest();
+  if (!d) return;
+  var url = 'calculator.html#dest=' + d.id + '&hub=' + currentHub + '&courses=' + encodeURIComponent(courses.join(','));
+  window.location.href = url;
+}
+
+function getCurrentDest() {
+  var id = new URLSearchParams(window.location.search).get('id');
+  return window.DESTINATIONS.find(function(x){ return x.id === id; });
+}
+
+function renderCostBars(d, opts, total) {
+  var flight = d.flights[opts.hub] || 0;
+  var nightlyRate = d.lodgingTiers[opts.lodgingTier] || d.lodgingTiers.mid;
+  var lodging = Math.round((nightlyRate * opts.nights) / Math.max(opts.groupSize,1));
+  var golf = d.golfPerRound * opts.rounds;
+  var food = 70 * opts.nights;
+  var car = d.rentalCar ? Math.ceil((65 * opts.nights) / Math.max(opts.groupSize,1)) : 0;
+
+  var items = [
+    {name:"✈ Flights",  amt:flight,  color:"#2563eb"},
+    {name:"🏨 Lodging",  amt:lodging, color:"#7c3aed"},
+    {name:"⛳ Golf",     amt:golf,    color:"#16a34a"},
+    {name:"🍽️ Food",    amt:food,    color:"#d97706"},
+    {name:"🚗 Car",     amt:car,     color:"#64748b"}
+  ];
+  var max = Math.max.apply(null, items.map(function(i){ return i.amt; }));
+  var html = '';
+  items.forEach(function(item) {
+    var pct = max > 0 ? Math.round((item.amt / max) * 100) : 0;
+    html += '<div class="cost-bar-row">' +
+      '<span class="cost-bar-name">' + item.name + '</span>' +
+      '<div class="cost-bar-track"><div class="cost-bar-fill" style="width:' + pct + '%;background:' + item.color + ';"></div></div>' +
+      '<span class="cost-bar-amt">$' + item.amt + '</span>' +
+      '</div>';
+  });
+  document.getElementById('costBars').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BADGE helper
+// ═══════════════════════════════════════════════════════════
+function badgeClass(v) {
+  if (v==='Top Tier')    return 'badge badge-top';
+  if (v==='Splurge Pick') return 'badge badge-splurge';
+  if (v==='Solid Pick')  return 'badge badge-solid';
+  if (v==='Budget Gem')  return 'badge badge-budget';
+  if (v==='Hidden Gem')  return 'badge badge-hidden';
+  return 'badge badge-value';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ZONE helpers
+// ═══════════════════════════════════════════════════════════
+var ZONES = [
+  {key:"on-site",   label:"On-Site / On Property",           cls:"zone-on-site"},
+  {key:"under30",   label:"Under 30 Minutes Away",           cls:"zone-under30"},
+  {key:"30to60",    label:"30 – 60 Minutes Away",            cls:"zone-30to60"},
+  {key:"1to2hr",    label:"1 – 2 Hours Away",                cls:"zone-1to2hr"},
+  {key:"over2hr",   label:"2+ Hours Away",                   cls:"zone-over2hr"}
+];
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER DESTINATION
+// ═══════════════════════════════════════════════════════════
+function renderDest(d) {
+  dest = d;
+
+  // Hero
+  document.title = d.name + ' — Golf Bach Party';
+  document.getElementById('heroImg').src = d.photo;
+  document.getElementById('heroImg').alt = d.name;
+  document.getElementById('heroRegion').textContent = d.region + (d.passport ? ' 🛂 Passport Required' : '');
+  document.getElementById('heroName').textContent = d.name;
+  var badge = document.getElementById('heroBadge');
+  badge.className = badgeClass(d.verdict);
+  badge.textContent = d.verdict;
+  document.getElementById('heroVibe').textContent = '"' + d.vibe + '"';
+
+  // Stat bar
+  document.getElementById('sbGolf').textContent = d.golf + '/10';
+  document.getElementById('sbTemp').textContent = d.augHigh + '°F';
+  document.getElementById('sbAirport').textContent = d.airport;
+  document.getElementById('sbDrive').textContent = d.drive;
+  document.getElementById('sbPassport').innerHTML = d.passport
+    ? '<span class="green">Yes 🛂</span>'
+    : '<span style="color:#4ade80">No ✓</span>';
+
+  // Group notes
+  document.getElementById('groupNotes').textContent = '💬 ' + d.groupNotes;
+
+  // Flight table
+  var fbody = '';
+  window.HUB_LIST.forEach(function(hub) {
+    var flightCost = d.flights[hub];
+    var total = window.getTotal(d, {hub:hub, nights:4, rounds:3, groupSize:8, lodgingTier:'mid'});
+    var isActive = hub === currentHub;
+    fbody += '<tr data-hub="' + hub + '" class="' + (isActive ? 'hub-highlight' : '') + '">' +
+      '<td><span class="flight-hub-code">' + hub + '</span></td>' +
+      '<td><span class="flight-hub-city">' + window.HUBS[hub].city + '</span></td>' +
+      '<td><span class="flight-price">$' + flightCost + '</span></td>' +
+      '<td><span class="flight-total">~$' + total + '/person</span></td>' +
+      '</tr>';
+  });
+  document.getElementById('flightBody').innerHTML = fbody;
+
+  // Cost breakdown (initial)
+  refreshCostUI();
+
+  // Golf courses
+  var courses = COURSE_DETAIL[d.id] || [];
+  var zonesHtml = '';
+  var zoneRank = 1;
+  ZONES.forEach(function(zone) {
+    var zCourses = courses.filter(function(c){ return c.zone === zone.key && c.fee > 0; });
+    if (zCourses.length === 0) return;
+    zonesHtml += '<div class="course-zone">' +
+      '<div class="course-zone-header">' +
+      '<span class="zone-badge ' + zone.cls + '">' + zone.label + '</span>' +
+      '</div>';
+    zCourses.forEach(function(c) {
+      var stars = '';
+      for (var i = 0; i < 5; i++) {
+        stars += i < Math.round(c.rating/2) ? '★' : '☆';
+      }
+      var nameHtml = c.url && c.url !== '#'
+        ? '<a href="' + c.url + '" target="_blank" rel="noopener">' + c.name + ' ↗</a>'
+        : c.name;
+      zonesHtml += '<div class="course-card">' +
+        '<div class="course-rank-num">#' + zoneRank + '</div>' +
+        '<div class="course-info">' +
+          '<div class="course-name">' + nameHtml + '</div>' +
+          '<div class="course-meta">' +
+            '<span class="course-tag">' + c.type + '</span>' +
+            '<span class="course-tag drive">⏱ ' + c.drive + '</span>' +
+            (c.designer ? '<span class="course-tag">✏️ ' + c.designer + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div style="text-align:right;flex-shrink:0;">' +
+          (c.fee > 0 ? '<div class="course-fee">$' + c.fee + '</div>' : '<div class="course-fee" style="color:var(--text-muted)">Private</div>') +
+          '<div class="course-rating">' + stars + ' ' + c.rating.toFixed(1) + '</div>' +
+        '</div>' +
+      '</div>';
+      zoneRank++;
+    });
+    zonesHtml += '</div>';
+  });
+  document.getElementById('courseZones').innerHTML = zonesHtml || '<p style="color:var(--text-muted)">Course data coming soon.</p>';
+
+  // Weather
+  var w = WEATHER[d.id] || [];
+  var wHtml = '';
+  w.forEach(function(high, i) {
+    wHtml += '<div class="weather-cell">' +
+      '<div class="weather-month">' + MONTHS[i] + '</div>' +
+      '<span class="weather-high" style="color:' + tempColor(high) + '">' + high + '°</span>' +
+      '<div class="weather-icon">' + tempIcon(high) + '</div>' +
+    '</div>';
+  });
+  document.getElementById('weatherGrid').innerHTML = wHtml;
+
+  // Sidebar — Quick Info
+  var qi = [
+    {k:"Region",        v:d.region},
+    {k:"Airport",       v:d.airport + ' (' + d.drive + ')'},
+    {k:"Lodging Type",  v:d.lodgingType},
+    {k:"Passport",      v:d.passport ? '🛂 Required' : '✓ Not needed'},
+    {k:"Rental Car",    v:d.rentalCar ? 'Recommended' : 'Not needed'},
+    {k:"Carts",         v:d.carts ? 'Available' : 'Walking only'},
+    {k:"Top Pick",      v:d.topPick ? '⭐ Yes' : 'No'}
+  ];
+  var qiHtml = '';
+  qi.forEach(function(r) {
+    qiHtml += '<div class="info-row">' +
+      '<span class="info-key">' + r.k + '</span>' +
+      '<span class="info-val">' + r.v + '</span>' +
+      '</div>';
+  });
+  document.getElementById('quickInfo').innerHTML = qiHtml;
+
+  // Sidebar — Scores
+  document.getElementById('scoreRings').innerHTML =
+    ring('Golf', d.golf) + ring('Drama', d.drama) + ring('Nightlife', d.nightlife) + ring('Food', d.food);
+
+  // Sidebar — Lodging
+  var lHtml = '';
+  [{t:'budget',l:'Budget'},{t:'mid',l:'Mid-Range'},{t:'premium',l:'Premium'}].forEach(function(tier) {
+    var nightly = d.lodgingTiers[tier.t];
+    var pp4 = Math.round((nightly * 4) / 8);
+    lHtml += '<div class="info-row">' +
+      '<span class="info-key">' + tier.l + '</span>' +
+      '<span class="info-val gold">$' + nightly + '/night · $' + pp4 + 'pp/4n</span>' +
+      '</div>';
+  });
+  document.getElementById('lodgingInfo').innerHTML = lHtml;
+}
+
+function ring(label, val) {
+  return '<div class="score-ring"><div class="score-ring-num">' + val + '</div><div class="score-ring-lbl">' + label + '</div></div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT — read ?id= from URL
+// ═══════════════════════════════════════════════════════════
+function getParam(name) {
+  var q = window.location.search;
+  var m = new RegExp('[?&]' + name + '=([^&]*)').exec(q);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+function init() {
+  // theme
+  try {
+    var saved = localStorage.getItem('golf-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  } catch(e){}
+
+  var id = getParam('id') || window.location.hash.replace('#','');
+  if (!id) {
+    window.location.href = 'index.html';
+    return;
+  }
+  var d = (window.DESTINATIONS || []).find(function(x){ return x.id === id; });
+  if (!d) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  // Update photo from our master map (baked into data.js updates)
+  renderDest(d);
+}
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  try { localStorage.setItem('golf-theme', isDark ? 'light' : 'dark'); } catch(e){}
+}
+
+init();
+</script>
+</body>
+</html>

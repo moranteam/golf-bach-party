@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Golf Trip — Cost Calculator</title>
+<link rel="stylesheet" href="style-shared.css">
+<script src="data.js"></script>
+<style>
+.calc-page{max-width:1100px;margin:0 auto;padding:1.75rem 1.25rem 3rem;}
+
+/* ── Page header ─────────────────────────────────────────── */
+.page-header{margin-bottom:1.75rem;text-align:center;}
+.page-header h1{color:var(--navy);margin-bottom:.4rem;}
+[data-theme="dark"] .page-header h1{color:var(--cream);}
+.page-header p{color:var(--text-muted);font-size:.9rem;max-width:480px;margin:0 auto;}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.calc-layout{
+  display:grid;
+  grid-template-columns:320px 1fr;
+  gap:1.5rem;
+  align-items:start;
+}
+@media(max-width:900px){.calc-layout{grid-template-columns:1fr;}}
+
+/* ── Controls panel ─────────────────────────────────────── */
+.controls-panel{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.25rem;
+  box-shadow:var(--shadow-sm);
+  position:sticky;top:80px;
+}
+.panel-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;color:var(--text);
+  margin-bottom:1rem;padding-bottom:.6rem;
+  border-bottom:2px solid var(--border);
+}
+
+.field{margin-bottom:1.1rem;}
+.field-label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.78rem;font-weight:700;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.05em;
+  margin-bottom:.45rem;
+}
+.field-label span{color:var(--gold);font-size:.9rem;font-weight:700;}
+
+/* Range slider */
+.slider{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:5px;
+  background:var(--border);border-radius:3px;outline:none;
+  transition:background .2s;
+}
+.slider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--gold);cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.25);
+  border:2px solid #fff;
+}
+.slider::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--gold);cursor:pointer;border:2px solid #fff;
+}
+
+/* Hub pills */
+.hub-pills{display:flex;gap:.35rem;flex-wrap:wrap;}
+.hub-pill{
+  background:var(--white);border:1.5px solid var(--border);
+  color:var(--text-muted);font-size:.75rem;font-weight:600;
+  padding:.3rem .7rem;border-radius:20px;
+  transition:all .15s;cursor:pointer;display:flex;align-items:center;gap:.25rem;
+}
+.hub-pill:hover{border-color:var(--gold);color:var(--gold);}
+.hub-pill.active{background:var(--gold);border-color:var(--gold);color:#fff;}
+
+/* Lodging tier cards */
+.tier-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;}
+.tier-card{
+  background:var(--cream2);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:.5rem .4rem;
+  text-align:center;cursor:pointer;transition:all .15s;
+}
+.tier-card:hover{border-color:var(--gold-light);}
+.tier-card.active{border-color:var(--gold);background:rgba(184,147,58,.1);}
+.tier-card .tier-icon{font-size:1.1rem;display:block;margin-bottom:.15rem;}
+.tier-card .tier-name{font-size:.68rem;font-weight:700;color:var(--text);display:block;}
+.tier-card .tier-price{font-size:.62rem;color:var(--text-muted);display:block;}
+
+/* Toggle per-person / group */
+.toggle-wrap{
+  display:flex;background:var(--cream2);border-radius:var(--radius-sm);
+  padding:.2rem;gap:.15rem;margin-bottom:1rem;
+}
+.toggle-btn{
+  flex:1;padding:.4rem .5rem;border-radius:6px;
+  font-size:.78rem;font-weight:600;border:none;
+  background:transparent;color:var(--text-muted);
+  transition:all .15s;cursor:pointer;
+}
+.toggle-btn.active{background:var(--white);color:var(--gold);box-shadow:var(--shadow-sm);}
+
+/* ── Results panel ──────────────────────────────────────── */
+.results-panel{}
+
+/* Mode toggle */
+.mode-tabs{
+  display:flex;gap:.5rem;margin-bottom:1.25rem;
+}
+.mode-tab{
+  padding:.45rem 1rem;border-radius:var(--radius-sm);
+  font-size:.82rem;font-weight:600;border:1.5px solid var(--border);
+  background:var(--white);color:var(--text-muted);cursor:pointer;
+  transition:all .15s;
+}
+.mode-tab:hover{border-color:var(--gold);color:var(--gold);}
+.mode-tab.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+[data-theme="dark"] .mode-tab.active{background:var(--gold);border-color:var(--gold);}
+
+/* Single result card */
+.result-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--shadow-sm);margin-bottom:1rem;
+}
+.result-card.shortlisted{border-color:var(--gold);}
+
+.result-img-wrap{position:relative;}
+.result-img{width:100%;height:160px;object-fit:cover;display:block;}
+.result-badge{position:absolute;top:.6rem;left:.6rem;}
+.result-rank{position:absolute;top:.6rem;right:.6rem;background:rgba(15,31,46,.75);color:#fff;font-size:.68rem;font-weight:700;padding:.15rem .4rem;border-radius:4px;}
+
+.result-body{padding:1rem 1.1rem;}
+.result-header{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.75rem;}
+.result-name{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--text);}
+.result-vibe{font-size:.75rem;color:var(--text-muted);font-style:italic;margin-top:.1rem;}
+
+/* Big cost display */
+.cost-hero{
+  background:var(--navy);color:#fff;
+  border-radius:var(--radius-sm);
+  padding:.9rem 1rem;margin-bottom:.9rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+[data-theme="dark"] .cost-hero{background:rgba(15,31,46,.5);border:1px solid var(--border);}
+.cost-main{display:flex;align-items:baseline;gap:.3rem;}
+.cost-amount{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--gold);}
+.cost-label{font-size:.8rem;color:rgba(255,255,255,.6);}
+.cost-group{font-size:.8rem;color:rgba(255,255,255,.5);}
+.cost-group strong{color:rgba(255,255,255,.8);}
+
+/* Breakdown bars */
+.breakdown{margin-bottom:.9rem;}
+.breakdown-title{font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;}
+.breakdown-item{margin-bottom:.45rem;}
+.breakdown-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.15rem;}
+.breakdown-key{font-size:.78rem;color:var(--text);font-weight:500;}
+.breakdown-val{font-size:.78rem;color:var(--text);font-weight:700;}
+.bar-track{height:6px;background:var(--cream2);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;background:var(--gold);transition:width .4s ease;}
+.bar-fill.blue{background:#2563eb;}
+.bar-fill.green{background:#16a34a;}
+.bar-fill.teal{background:#0891b2;}
+.bar-fill.orange{background:#d97706;}
+
+/* Stats row */
+.result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.9rem;}
+.rstat{background:var(--cream2);border-radius:6px;padding:.35rem .3rem;text-align:center;}
+.rstat .rlbl{font-size:.58rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;display:block;}
+.rstat .rval{font-size:.82rem;font-weight:700;color:var(--text);}
+
+/* Courses list in result */
+.result-courses{margin-bottom:.8rem;}
+.result-courses-title{font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem;}
+.result-courses-list{display:flex;flex-wrap:wrap;gap:.25rem;}
+.course-tag{
+  background:var(--cream2);border:1px solid var(--border);
+  color:var(--text);font-size:.7rem;
+  padding:.15rem .5rem;border-radius:4px;
+}
+
+/* Actions row */
+.result-actions{display:flex;gap:.5rem;flex-wrap:wrap;}
+.btn-shortlist{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-size:.78rem;font-weight:600;
+  padding:.45rem .9rem;border-radius:var(--radius-sm);
+  transition:all .15s;cursor:pointer;
+}
+.btn-shortlist:hover,.btn-shortlist.on{border-color:var(--gold);color:var(--gold);}
+.btn-shortlist.on{background:rgba(184,147,58,.1);}
+.btn-map{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-size:.78rem;font-weight:600;
+  padding:.45rem .9rem;border-radius:var(--radius-sm);
+  text-decoration:none;transition:all .15s;
+}
+.btn-map:hover{border-color:var(--gold);color:var(--gold);}
+
+/* Export button */
+.export-btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-size:.78rem;font-weight:600;
+  padding:.45rem .9rem;border-radius:var(--radius-sm);
+  transition:all .15s;cursor:pointer;margin-left:auto;
+}
+.export-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── Compare mode ───────────────────────────────────────── */
+.compare-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1rem;
+}
+.compare-slot{
+  background:var(--white);border:2px dashed var(--border);
+  border-radius:var(--radius);padding:1.25rem;
+  text-align:center;cursor:pointer;
+  transition:all .2s;min-height:120px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.compare-slot:hover{border-color:var(--gold);background:rgba(184,147,58,.04);}
+.compare-slot .slot-icon{font-size:1.75rem;margin-bottom:.4rem;}
+.compare-slot .slot-hint{font-size:.8rem;color:var(--text-muted);}
+
+.compare-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+.compare-img{width:100%;height:110px;object-fit:cover;display:block;}
+.compare-body{padding:.8rem .85rem;}
+.compare-name{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.5rem;}
+.compare-total{font-size:1.5rem;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif;margin-bottom:.6rem;}
+.compare-total span{font-size:.72rem;color:var(--text-muted);font-family:Inter,sans-serif;font-weight:400;}
+.compare-rows{}
+.compare-row{display:flex;justify-content:space-between;padding:.2rem 0;border-bottom:1px solid var(--border-light);font-size:.78rem;}
+.compare-row:last-child{border:none;}
+.compare-row .ck{color:var(--text-muted);}
+.compare-row .cv{font-weight:600;color:var(--text);}
+.compare-remove{
+  width:100%;background:transparent;border:1px solid var(--border-light);
+  color:var(--text-muted);font-size:.75rem;padding:.35rem;
+  border-radius:4px;margin-top:.6rem;cursor:pointer;transition:all .15s;
+}
+.compare-remove:hover{border-color:#e55;color:#e55;}
+
+/* Shortlist preload banner */
+.shortlist-banner{
+  background:rgba(184,147,58,.1);border:1px solid rgba(184,147,58,.3);
+  border-radius:var(--radius-sm);padding:.6rem .9rem;
+  font-size:.8rem;color:var(--text);margin-bottom:1.1rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.shortlist-banner strong{color:var(--gold);}
+
+/* Select styled */
+.styled-select{
+  width:100%;
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:.45rem .75rem;
+  font-size:.875rem;font-family:inherit;color:var(--text);
+  transition:border-color .2s;cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8933a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .75rem center;
+  padding-right:2.25rem;
+}
+.styled-select:focus{outline:none;border-color:var(--gold);}
+
+.dest-select-wrap{position:relative;}
+
+/* ── Hub Toggle Bar ──────────────────────────────────────── */
+.hub-bar{
+  background:var(--navy);
+  padding:.6rem 1.25rem;
+  display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;
+  border-bottom:2px solid var(--gold);
+}
+.hub-bar-label{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;margin-right:.25rem;white-space:nowrap;}
+.hub-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);font-size:.78rem;font-weight:700;padding:.32rem .9rem;border-radius:20px;transition:all .2s ease;white-space:nowrap;}
+.hub-btn:hover{background:rgba(184,147,58,.25);border-color:rgba(184,147,58,.6);color:#fff;}
+.hub-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
+
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────── -->
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">⛳ Golf Trip <span>2025</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">🏠 <span class="nav-link-label">Home</span></a>
+    <a href="explorer.html" class="nav-link">✈️ <span class="nav-link-label">Flight Map</span></a>
+    <a href="calculator.html" class="nav-link active">🧮 <span class="nav-link-label">Calculator</span></a>
+  </div>
+  <div class="nav-right">
+    <button class="nav-shortlist-btn" id="navSlBtn">
+      ⭐ Shortlist <span class="nav-shortlist-count" id="navCount">0</span>
+    </button>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+
+<div class="calc-page">
+  <div class="page-header">
+    <h1>Trip Cost Calculator</h1>
+    <p>Dial in your group details, then pick any destination to see a full cost breakdown. Compare up to 3 trips side-by-side.</p>
+  </div>
+
+  <div class="calc-layout">
+
+    <!-- ── Left: Controls ─────────────────────────────────── -->
+    <div class="controls-panel">
+      <div class="panel-title">⚙️ Trip Settings</div>
+
+      <!-- Destination -->
+      <div class="field">
+        <div class="field-label">Destination <span id="lblDest">—</span></div>
+        <div class="dest-select-wrap">
+          <select class="styled-select" id="destSelect" onchange="onDestChange(this.value)">
+            <option value="">— Pick a destination —</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Hub -->
+      <div class="field">
+        <div class="field-label">Flying from</div>
+        <div class="hub-pills" id="hubPills">
+          <button class="hub-pill active" data-hub="SFO" onclick="setHub('SFO',this)">🌉 SFO</button>
+          <button class="hub-pill" data-hub="LAX" onclick="setHub('LAX',this)">🎬 LAX</button>
+          <button class="hub-pill" data-hub="JFK" onclick="setHub('JFK',this)">🗽 JFK</button>
+          <button class="hub-pill" data-hub="BOS" onclick="setHub('BOS',this)">⚾ BOS</button>
+        </div>
+      </div>
+
+      <!-- Group size -->
+      <div class="field">
+        <div class="field-label">Group size <span id="lblGroup">8 people</span></div>
+        <input type="range" class="slider" id="slGroup" min="4" max="24" value="8" step="1" oninput="onSliderChange()">
+      </div>
+
+      <!-- Nights -->
+      <div class="field">
+        <div class="field-label">Nights <span id="lblNights">4 nights</span></div>
+        <input type="range" class="slider" id="slNights" min="2" max="8" value="4" step="1" oninput="onSliderChange()">
+      </div>
+
+      <!-- Rounds -->
+      <div class="field">
+        <div class="field-label">Rounds of golf <span id="lblRounds">3 rounds</span></div>
+        <input type="range" class="slider" id="slRounds" min="1" max="6" value="3" step="1" oninput="onSliderChange()">
+      </div>
+
+      <!-- Lodging tier -->
+      <div class="field">
+        <div class="field-label">Lodging tier</div>
+        <div class="tier-cards">
+          <div class="tier-card" data-tier="budget" onclick="setTier('budget',this)">
+            <span class="tier-icon">🏨</span>
+            <span class="tier-name">Budget</span>
+            <span class="tier-price">~$90–130/night</span>
+          </div>
+          <div class="tier-card active" data-tier="mid" onclick="setTier('mid',this)">
+            <span class="tier-icon">🏩</span>
+            <span class="tier-name">Mid</span>
+            <span class="tier-price">~$160–280/night</span>
+          </div>
+          <div class="tier-card" data-tier="premium" onclick="setTier('premium',this)">
+            <span class="tier-icon">🏰</span>
+            <span class="tier-name">Premium</span>
+            <span class="tier-price">~$380–750/night</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-person / group toggle -->
+      <div class="toggle-wrap">
+        <button class="toggle-btn active" onclick="setViewMode('pp',this)" id="btnPP">Per Person</button>
+        <button class="toggle-btn" onclick="setViewMode('group',this)" id="btnGroup">Full Group</button>
+      </div>
+
+      <!-- Export CSV -->
+      <button class="export-btn" onclick="exportCSV()" style="width:100%;justify-content:center;margin-top:.25rem;">
+        📥 Export All Destinations to CSV
+      </button>
+    </div>
+
+    <!-- ── Right: Results ─────────────────────────────────── -->
+    <div class="results-panel">
+
+      <!-- Mode tabs -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="mode-tabs">
+          <button class="mode-tab active" onclick="setMode('single',this)">📊 Single Destination</button>
+          <button class="mode-tab" onclick="setMode('compare',this)">⚖️ Compare (up to 3)</button>
+        </div>
+      </div>
+
+      <!-- Shortlist banner (shown if shortlist preloaded) -->
+      <div class="shortlist-banner" id="shortlistBanner" style="display:none;">
+        ⭐ <span id="bannerText"></span> — <a href="index.html" style="color:var(--gold)">edit shortlist →</a>
+      </div>
+
+      <!-- Single mode -->
+      <div id="singleMode">
+        <div id="singleResult">
+          <div style="text-align:center;padding:3rem 1rem;color:var(--text-muted);">
+            <div style="font-size:3rem;margin-bottom:.75rem;">⛳</div>
+            <div style="font-size:.9rem;">Select a destination on the left to see the full cost breakdown.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compare mode -->
+      <div id="compareMode" style="display:none;">
+        <div class="compare-grid" id="compareGrid"></div>
+        <div style="margin-top:.75rem;text-align:center;">
+          <button class="export-btn" onclick="exportCompare()" style="display:inline-flex;">
+            📥 Export Comparison to CSV
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────────────
+var DESTS = window.DESTINATIONS;
+var currentDestId = null;
+var currentHub = 'SFO';
+var currentTier = 'mid';
+var viewMode = 'pp';    // 'pp' or 'group'
+var pageMode = 'single'; // 'single' or 'compare'
+var compareList = [];   // up to 3 dest ids
+
+var BEST_FOR = {
+  'central-oregon':'Best All-Around Western Trip','bandon-dunes':'Top Golf Experience in America',
+  'coeur-dalene':'Best Mountain-Lake Setting','gamble-sands':'Best Under-the-Radar Pilgrimage',
+  'st-george':'Most Dramatic Red-Rock Scenery','kelowna':'Best Wine-Country Golf Value',
+  'mesquite':'Most Visually Insane Course','palm-springs':'Best Desert Glamour Experience',
+  'boise':'Best Budget Western Option','kamloops':'Cheapest Green Fees on the List',
+  'traverse-city':'Best Value for East-Coast Crews','whistling-straits':'Top Bucket-List Ryder Cup Site',
+  'sand-valley':"Wisconsin's Answer to Bandon",'kiawah-island':'Most Prestigious Ocean-Links',
+  'streamsong':'Wildest Golf Landscape in the US','pinehurst':"Golf's Ancestral Home",
+  'reynolds-lake-oconee':'Best-Value Southeast Luxury','myrtle-beach':'Best Party + Golf Combo Value',
+  'french-lick':'Best Self-Contained Midwest Resort','austin':'Best Nightlife + Golf Combo'
+};
+
+// ─────────────────────────────────────────────────────────────
+//  SHORTLIST
+// ─────────────────────────────────────────────────────────────
+function loadShortlist() {
+  try { return JSON.parse(localStorage.getItem('golf-shortlist') || '[]'); } catch(e) { return []; }
+}
+function saveShortlist(ids) {
+  try { localStorage.setItem('golf-shortlist', JSON.stringify(ids)); } catch(e){}
+}
+function isShortlisted(id) { return loadShortlist().indexOf(id) !== -1; }
+function toggleSL(id) {
+  var sl = loadShortlist(); var idx = sl.indexOf(id);
+  if (idx === -1) sl.push(id); else sl.splice(idx, 1);
+  saveShortlist(sl); updateNavCount();
+  refreshCurrentResult();
+}
+function updateNavCount() {
+  var n = loadShortlist().length;
+  document.getElementById('navCount').textContent = n;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  THEME
+// ─────────────────────────────────────────────────────────────
+function toggleTheme() {
+  var html = document.documentElement;
+  var isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  try { localStorage.setItem('golf-theme', isDark ? 'light' : 'dark'); } catch(e){}
+}
+function initTheme() {
+  try { var s = localStorage.getItem('golf-theme'); if(s) document.documentElement.setAttribute('data-theme',s); } catch(e){}
+}
+
+// ─────────────────────────────────────────────────────────────
+//  CONTROLS
+// ─────────────────────────────────────────────────────────────
+function getOpts() {
+  return {
+    hub: currentHub,
+    nights: parseInt(document.getElementById('slNights').value),
+    rounds: parseInt(document.getElementById('slRounds').value),
+    groupSize: parseInt(document.getElementById('slGroup').value),
+    lodgingTier: currentTier
+  };
+}
+
+function setHub(hub, btn) {
+  currentHub = hub;
+  document.querySelectorAll('.hub-pill').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  refreshCurrentResult();
+  if (pageMode === 'compare') renderCompare();
+}
+
+function setTier(tier, card) {
+  currentTier = tier;
+  document.querySelectorAll('.tier-card').forEach(function(c) { c.classList.remove('active'); });
+  card.classList.add('active');
+  refreshCurrentResult();
+  if (pageMode === 'compare') renderCompare();
+}
+
+function onSliderChange() {
+  var g = document.getElementById('slGroup').value;
+  var n = document.getElementById('slNights').value;
+  var r = document.getElementById('slRounds').value;
+  document.getElementById('lblGroup').textContent = g + ' people';
+  document.getElementById('lblNights').textContent = n + ' night' + (n==1?'':'s');
+  document.getElementById('lblRounds').textContent = r + ' round' + (r==1?'':'s');
+  refreshCurrentResult();
+  if (pageMode === 'compare') renderCompare();
+}
+
+function setViewMode(mode, btn) {
+  viewMode = mode;
+  document.querySelectorAll('.toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  refreshCurrentResult();
+  if (pageMode === 'compare') renderCompare();
+}
+
+function setMode(mode, btn) {
+  pageMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  if (mode === 'single') {
+    document.getElementById('singleMode').style.display = '';
+    document.getElementById('compareMode').style.display = 'none';
+  } else {
+    document.getElementById('singleMode').style.display = 'none';
+    document.getElementById('compareMode').style.display = '';
+    renderCompare();
+  }
+}
+
+function onDestChange(id) {
+  currentDestId = id || null;
+  var d = id ? DESTS.find(function(x) { return x.id === id; }) : null;
+  document.getElementById('lblDest').textContent = d ? d.name : '—';
+  refreshCurrentResult();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  BADGE CLASS
+// ─────────────────────────────────────────────────────────────
+function badgeClass(v) {
+  if (v==='Top Tier') return 'badge badge-top';
+  if (v==='Splurge Pick') return 'badge badge-splurge';
+  if (v==='Solid Pick') return 'badge badge-solid';
+  if (v==='Budget Gem') return 'badge badge-budget';
+  if (v==='Hidden Gem') return 'badge badge-hidden';
+  return 'badge badge-value';
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SINGLE RESULT RENDER
+// ─────────────────────────────────────────────────────────────
+function refreshCurrentResult() {
+  if (pageMode !== 'single') return;
+  if (!currentDestId) {
+    document.getElementById('singleResult').innerHTML =
+      '<div style="text-align:center;padding:3rem 1rem;color:var(--text-muted);"><div style="font-size:3rem;margin-bottom:.75rem;">⛳</div><div style="font-size:.9rem;">Select a destination on the left to see the full cost breakdown.</div></div>';
+    return;
+  }
+  var d = DESTS.find(function(x) { return x.id === currentDestId; });
+  if (!d) return;
+  var opts = getOpts();
+  var total = window.getTotal(d, opts);
+  var mult = viewMode === 'group' ? opts.groupSize : 1;
+  var label = viewMode === 'group' ? 'Full Group' : 'Per Person';
+
+  // Cost breakdown
+  var flightPP  = d.flights[opts.hub] || 0;
+  var nightRate = d.lodgingTiers[opts.lodgingTier] || d.lodgingTiers.mid;
+  var lodgePP   = Math.round((nightRate * opts.nights) / Math.max(opts.groupSize, 1));
+  var golfPP    = d.golfPerRound * opts.rounds;
+  var foodPP    = 70 * opts.nights;
+  var carPP     = d.rentalCar ? Math.ceil((65 * opts.nights) / Math.max(opts.groupSize, 1)) : 0;
+  var rawTotal  = flightPP + lodgePP + golfPP + foodPP + carPP;
+  var maxBar    = rawTotal;
+
+  function barW(v) { return Math.round((v / maxBar) * 100) + '%'; }
+  function fmt(v) { return '$' + (v * mult).toLocaleString(); }
+
+  var on = isShortlisted(d.id);
+  var idx = DESTS.indexOf(d);
+
+  var html =
+  '<div class="result-card' + (on ? ' shortlisted' : '') + '">' +
+    '<div class="result-img-wrap">' +
+      '<img class="result-img" src="' + d.photo + '" alt="' + d.name + '">' +
+      '<span class="result-badge"><span class="' + badgeClass(d.verdict) + '">' + d.verdict + '</span></span>' +
+      '<span class="result-rank">#' + (idx+1) + '</span>' +
+    '</div>' +
+    '<div class="result-body">' +
+      '<div class="result-header">' +
+        '<div>' +
+          '<div class="result-name">' + d.name + '</div>' +
+          '<div class="result-vibe">' + d.vibe + '</div>' +
+        '</div>' +
+      '</div>' +
+      // Big cost
+      '<div class="cost-hero">' +
+        '<div class="cost-main">' +
+          '<span class="cost-amount">' + fmt(rawTotal) + '</span>' +
+          '<span class="cost-label">' + label + '</span>' +
+        '</div>' +
+        (viewMode === 'pp' ? '<div class="cost-group">Group total <strong>' + fmt(rawTotal) + '</strong></div>'.replace('$' + rawTotal.toLocaleString(), '$' + (rawTotal * opts.groupSize).toLocaleString()) : '') +
+      '</div>' +
+      // Breakdown bars
+      '<div class="breakdown">' +
+        '<div class="breakdown-title">Cost Breakdown</div>' +
+        mkBar('✈️ Flights', flightPP, mult, barW(flightPP), 'blue') +
+        mkBar('🏨 Lodging', lodgePP, mult, barW(lodgePP), 'green') +
+        mkBar('⛳ Golf ('+ opts.rounds +' rounds)', golfPP, mult, barW(golfPP), '') +
+        mkBar('🍽 Food & Drink', foodPP, mult, barW(foodPP), 'orange') +
+        (d.rentalCar ? mkBar('🚗 Rental Car', carPP, mult, barW(carPP), 'teal') : '') +
+      '</div>' +
+      // Stats
+      '<div class="result-stats">' +
+        '<div class="rstat"><span class="rlbl">Golf Score</span><span class="rval">' + d.golf + '/10</span></div>' +
+        '<div class="rstat"><span class="rlbl">$/Round</span><span class="rval">$' + d.golfPerRound + '</span></div>' +
+        '<div class="rstat"><span class="rlbl">Aug High</span><span class="rval">' + d.augHigh + '°F</span></div>' +
+        '<div class="rstat"><span class="rlbl">Courses</span><span class="rval">' + d.courses.length + '</span></div>' +
+      '</div>' +
+      // Courses
+      '<div class="result-courses">' +
+        '<div class="result-courses-title">Top Courses</div>' +
+        '<div class="result-courses-list">' +
+          d.courses.map(function(c) { return '<span class="course-tag">⛳ ' + c + '</span>'; }).join('') +
+        '</div>' +
+      '</div>' +
+      // Group notes
+      '<div style="font-size:.78rem;color:var(--text-muted);font-style:italic;line-height:1.5;border-left:2px solid var(--gold);padding-left:.65rem;margin-bottom:.85rem;">' + d.groupNotes + '</div>' +
+      // Actions
+      '<div class="result-actions">' +
+        '<button class="btn-shortlist' + (on?' on':'') + '" onclick="toggleSL(\'' + d.id + '\')">' +
+          (on ? '★ Shortlisted' : '☆ Add to Shortlist') +
+        '</button>' +
+        '<a href="explorer.html#dest=' + d.id + '" class="btn-map">🗺 View on Map</a>' +
+        (compareList.indexOf(d.id)===-1 && compareList.length < 3 ?
+          '<button class="btn-shortlist" onclick="addToCompare(\'' + d.id + '\')">⚖️ Add to Compare</button>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  document.getElementById('singleResult').innerHTML = html;
+}
+
+function mkBar(label, val, mult, width, colorClass) {
+  return '<div class="breakdown-item">' +
+    '<div class="breakdown-row">' +
+      '<span class="breakdown-key">' + label + '</span>' +
+      '<span class="breakdown-val">$' + (val * mult).toLocaleString() + '</span>' +
+    '</div>' +
+    '<div class="bar-track"><div class="bar-fill ' + colorClass + '" style="width:' + width + '"></div></div>' +
+  '</div>';
+}
+
+// ─────────────────────────────────────────────────────────────
+//  COMPARE MODE
+// ─────────────────────────────────────────────────────────────
+function addToCompare(id) {
+  if (compareList.indexOf(id) === -1 && compareList.length < 3) {
+    compareList.push(id);
+  }
+  setMode('compare', document.querySelectorAll('.mode-tab')[1]);
+  renderCompare();
+}
+
+function removeFromCompare(id) {
+  compareList = compareList.filter(function(x) { return x !== id; });
+  renderCompare();
+}
+
+function renderCompare() {
+  var grid = document.getElementById('compareGrid');
+  var opts = getOpts();
+  var html = '';
+
+  // Render existing compare items
+  compareList.forEach(function(id) {
+    var d = DESTS.find(function(x) { return x.id === id; });
+    if (!d) return;
+    var total = window.getTotal(d, opts);
+    var mult = viewMode === 'group' ? opts.groupSize : 1;
+    var flightPP  = d.flights[opts.hub] || 0;
+    var nightRate = d.lodgingTiers[opts.lodgingTier] || d.lodgingTiers.mid;
+    var lodgePP   = Math.round((nightRate * opts.nights) / Math.max(opts.groupSize, 1));
+    var golfPP    = d.golfPerRound * opts.rounds;
+    var foodPP    = 70 * opts.nights;
+    var carPP     = d.rentalCar ? Math.ceil((65 * opts.nights) / Math.max(opts.groupSize, 1)) : 0;
+
+    html += '<div class="compare-card">' +
+      '<img class="compare-img" src="' + d.photo + '" alt="' + d.name + '">' +
+      '<div class="compare-body">' +
+        '<div class="compare-name">' + d.name + '</div>' +
+        '<div class="compare-total">$' + (total * mult).toLocaleString() + ' <span>' + (viewMode==='group'?'group total':'per person') + '</span></div>' +
+        '<div class="compare-rows">' +
+          '<div class="compare-row"><span class="ck">✈ Flight</span><span class="cv">$' + (flightPP*mult).toLocaleString() + '</span></div>' +
+          '<div class="compare-row"><span class="ck">🏨 Lodging</span><span class="cv">$' + (lodgePP*mult).toLocaleString() + '</span></div>' +
+          '<div class="compare-row"><span class="ck">⛳ Golf</span><span class="cv">$' + (golfPP*mult).toLocaleString() + '</span></div>' +
+          '<div class="compare-row"><span class="ck">🍽 Food</span><span class="cv">$' + (foodPP*mult).toLocaleString() + '</span></div>' +
+          (d.rentalCar ? '<div class="compare-row"><span class="ck">🚗 Car</span><span class="cv">$' + (carPP*mult).toLocaleString() + '</span></div>' : '') +
+          '<div class="compare-row"><span class="ck">⛳ Golf</span><span class="cv">' + d.golf + '/10</span></div>' +
+          '<div class="compare-row"><span class="ck">🌡 Aug High</span><span class="cv">' + d.augHigh + '°F</span></div>' +
+          '<div class="compare-row"><span class="ck">🛂 Passport</span><span class="cv">' + (d.passport?'Required':'No') + '</span></div>' +
+        '</div>' +
+        '<button class="compare-remove" onclick="removeFromCompare(\'' + d.id + '\')">✕ Remove</button>' +
+      '</div>' +
+    '</div>';
+  });
+
+  // Add slots if < 3
+  var slots = 3 - compareList.length;
+  for (var i = 0; i < slots; i++) {
+    html += '<div class="compare-slot" onclick="openDestPicker()">' +
+      '<div class="slot-icon">➕</div>' +
+      '<div class="slot-hint">Click to add a destination<br><small style="color:var(--text-light)">or select from the left panel</small></div>' +
+    '</div>';
+  }
+
+  grid.innerHTML = html;
+}
+
+function openDestPicker() {
+  // Switch to single mode and focus the dropdown
+  setMode('single', document.querySelectorAll('.mode-tab')[0]);
+  document.getElementById('destSelect').focus();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  POPULATE DROPDOWN
+// ─────────────────────────────────────────────────────────────
+function populateDropdown() {
+  var sel = document.getElementById('destSelect');
+  var wg = document.createElement('optgroup'); wg.label = '🌊 West Coast (Top 10)';
+  DESTS.slice(0,10).forEach(function(d, i) {
+    var o = document.createElement('option'); o.value = d.id;
+    o.textContent = (i+1) + '. ' + d.name + ' — ' + d.verdict;
+    wg.appendChild(o);
+  });
+  var eg = document.createElement('optgroup'); eg.label = '🌴 East Coast (Top 10)';
+  DESTS.slice(10,20).forEach(function(d, i) {
+    var o = document.createElement('option'); o.value = d.id;
+    o.textContent = (i+11) + '. ' + d.name + ' — ' + d.verdict;
+    eg.appendChild(o);
+  });
+  sel.appendChild(wg); sel.appendChild(eg);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  LOAD FROM URL HASH (e.g. calculator.html#dest=bandon-dunes&hub=SFO)
+// ─────────────────────────────────────────────────────────────
+function loadFromHash() {
+  var hash = window.location.hash.replace('#','');
+  if (!hash) return;
+  var params = {};
+  hash.split('&').forEach(function(p) {
+    var kv = p.split('='); params[kv[0]] = kv[1];
+  });
+  if (params.hub && ['SFO','LAX','JFK','BOS'].indexOf(params.hub) !== -1) {
+    currentHub = params.hub;
+    document.querySelectorAll('.hub-pill').forEach(function(b) { b.classList.remove('active'); });
+    var hp = document.querySelector('[data-hub="'+params.hub+'"]');
+    if (hp) hp.classList.add('active');
+  }
+  if (params.dest) {
+    var sel = document.getElementById('destSelect');
+    sel.value = params.dest;
+    onDestChange(params.dest);
+  }
+  // Load shortlist into compare if hash has sl=
+  if (params.sl) {
+    var ids = params.sl.split(',').filter(Boolean);
+    compareList = ids.slice(0,3);
+    if (compareList.length > 0) {
+      var banner = document.getElementById('shortlistBanner');
+      document.getElementById('bannerText').textContent =
+        compareList.length + ' shortlisted destinations preloaded — switch to Compare tab to see them side-by-side';
+      banner.style.display = 'flex';
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  EXPORT CSV
+// ─────────────────────────────────────────────────────────────
+function exportCSV() {
+  var opts = getOpts();
+  var rows = [['Rank','Name','Region','Verdict','Best For','Est. Cost/Person ('+opts.hub+')','Flight ('+opts.hub+')','Lodging/night','Golf/Round','Food','Car','Golf Score','Aug High','Courses','Passport','Vibe','Group Notes']];
+  DESTS.forEach(function(d, i) {
+    var total = window.getTotal(d, opts);
+    var nightRate = d.lodgingTiers[opts.lodgingTier] || d.lodgingTiers.mid;
+    rows.push([
+      i+1, d.name, d.region, d.verdict, BEST_FOR[d.id]||d.vibe,
+      '$'+total, '$'+d.flights[opts.hub], '$'+nightRate,
+      '$'+d.golfPerRound, '$'+(70*opts.nights),
+      d.rentalCar ? '$'+Math.ceil((65*opts.nights)/Math.max(opts.groupSize,1)) : '$0',
+      d.golf+'/10', d.augHigh+'°F', d.courses.join('; '),
+      d.passport?'Required':'No', d.vibe, d.groupNotes
+    ]);
+  });
+  var csv = rows.map(function(r) {
+    return r.map(function(v) { return '"'+String(v).replace(/"/g,'""')+'"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], {type:'text/csv'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'golf-trip-destinations.csv'; a.click();
+}
+
+function exportCompare() {
+  var opts = getOpts();
+  var rows = [['Destination','Total/Person','Flight','Lodging','Golf','Food','Car','Golf Score','Aug High','Passport']];
+  compareList.forEach(function(id) {
+    var d = DESTS.find(function(x) { return x.id === id; });
+    if (!d) return;
+    var total = window.getTotal(d, opts);
+    var nightRate = d.lodgingTiers[opts.lodgingTier] || d.lodgingTiers.mid;
+    var lodgePP = Math.round((nightRate * opts.nights) / Math.max(opts.groupSize,1));
+    rows.push([d.name,'$'+total,'$'+d.flights[opts.hub],'$'+lodgePP,'$'+(d.golfPerRound*opts.rounds),'$'+(70*opts.nights),
+      d.rentalCar?'$'+Math.ceil((65*opts.nights)/Math.max(opts.groupSize,1)):'$0',
+      d.golf+'/10',d.augHigh+'°F',d.passport?'Required':'No']);
+  });
+  var csv = rows.map(function(r) {
+    return r.map(function(v) { return '"'+String(v).replace(/"/g,'""')+'"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], {type:'text/csv'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'golf-trip-comparison.csv'; a.click();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────
+initTheme();
+updateNavCount();
+populateDropdown();
+loadFromHash();
+// Initialize label text
+document.getElementById('lblGroup').textContent = document.getElementById('slGroup').value + ' people';
+document.getElementById('lblNights').textContent = document.getElementById('slNights').value + ' nights';
+document.getElementById('lblRounds').textContent = document.getElementById('slRounds').value + ' rounds';
+
+// Nav shortlist button → index.html
+document.getElementById('navSlBtn').addEventListener('click', function() {
+  window.location.href = 'index.html';
+});
+</script>
+</body>
+</html>

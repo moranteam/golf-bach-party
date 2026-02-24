@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Golf Trip — Flight Map</title>
+<link rel="stylesheet" href="style-shared.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="data.js"></script>
+<style>
+html,body{height:100%;overflow:hidden;}
+body{display:flex;flex-direction:column;}
+
+/* ── Map page layout ─────────────────────────────────────── */
+.map-page{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;}
+
+/* ── Instruction strip ───────────────────────────────────── */
+.instructions{
+  background:var(--navy);color:#fff;
+  padding:.5rem 1.25rem;
+  display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;
+  font-size:.78rem;border-bottom:1px solid rgba(255,255,255,.08);
+  flex-shrink:0;
+}
+.inst-step{display:flex;align-items:center;gap:.4rem;opacity:.75;}
+.inst-step .num{
+  background:var(--gold);color:#fff;font-weight:700;
+  width:18px;height:18px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:.65rem;flex-shrink:0;
+}
+.inst-sep{color:var(--gold);opacity:.5;}
+
+/* ── Top controls ────────────────────────────────────────── */
+.map-controls{
+  background:var(--cream);
+  border-bottom:2px solid var(--border);
+  padding:.75rem 1.25rem;
+  display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+  flex-shrink:0;
+  box-shadow:var(--shadow-sm);
+}
+
+/* Departure buttons */
+.dep-group{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
+.dep-label{font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.dep-btn{
+  display:flex;flex-direction:column;align-items:center;
+  background:var(--white);border:2px solid var(--border);
+  border-radius:var(--radius);padding:.5rem .8rem;
+  transition:all .2s ease;cursor:pointer;
+  min-width:72px;
+}
+.dep-btn:hover{border-color:var(--gold);background:rgba(184,147,58,.07);}
+.dep-btn.active{border-color:var(--gold);background:var(--gold);color:#fff;}
+.dep-btn .icon{font-size:1.35rem;line-height:1.1;margin-bottom:.15rem;}
+.dep-btn .code{font-size:.7rem;font-weight:700;letter-spacing:.04em;}
+.dep-btn .city{font-size:.6rem;opacity:.7;}
+.dep-btn.active .city{opacity:.85;}
+
+/* Destination dropdown */
+.dest-group{display:flex;align-items:center;gap:.6rem;flex:1;min-width:200px;}
+.dest-label{font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.dest-select{
+  flex:1;
+  background:var(--white);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:.45rem .75rem;
+  font-size:.875rem;font-family:inherit;color:var(--text);
+  transition:border-color .2s;cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8933a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .75rem center;
+  padding-right:2.25rem;
+}
+.dest-select:focus{outline:none;border-color:var(--gold);}
+.dest-select:hover{border-color:var(--gold-light);}
+
+.clear-btn{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-size:.75rem;
+  padding:.4rem .7rem;border-radius:var(--radius-sm);
+  transition:all .2s;white-space:nowrap;
+}
+.clear-btn:hover{border-color:#e55;color:#e55;}
+
+/* ── Map container ───────────────────────────────────────── */
+.map-wrap{
+  flex:1;position:relative;min-height:0;
+}
+#map{
+  width:100%;height:100%;
+}
+#arcCanvas{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  pointer-events:none;z-index:400;
+}
+
+/* ── Info panel ──────────────────────────────────────────── */
+.info-panel{
+  position:absolute;bottom:1rem;right:1rem;
+  width:320px;max-width:calc(100vw - 2rem);
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-lg);
+  z-index:500;overflow:hidden;
+  transform:translateY(20px);opacity:0;
+  transition:all .3s ease;pointer-events:none;
+}
+.info-panel.visible{transform:translateY(0);opacity:1;pointer-events:auto;}
+
+.info-img{width:100%;height:120px;object-fit:cover;display:block;}
+.info-body{padding:.85rem .9rem;}
+.info-header{display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;margin-bottom:.6rem;}
+.info-name{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--text);}
+.info-close{background:transparent;border:none;color:var(--text-muted);font-size:1rem;padding:.15rem .35rem;border-radius:4px;flex-shrink:0;}
+.info-close:hover{color:var(--text);}
+
+.info-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;margin-bottom:.65rem;}
+.info-stat{background:var(--cream2);border-radius:6px;padding:.3rem .35rem;text-align:center;}
+.info-stat .lbl{font-size:.58rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;display:block;}
+.info-stat .val{font-size:.85rem;font-weight:700;color:var(--text);}
+.info-stat .val.gold{color:var(--gold);}
+
+.info-courses{margin-bottom:.65rem;}
+.info-courses-title{font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem;}
+.info-courses ul{list-style:none;padding:0;}
+.info-courses li{font-size:.75rem;color:var(--text);padding:.1rem 0;padding-left:.8rem;position:relative;}
+.info-courses li::before{content:'⛳';position:absolute;left:0;font-size:.6rem;top:.15rem;}
+
+.info-notes{font-size:.72rem;color:var(--text-muted);font-style:italic;line-height:1.4;margin-bottom:.65rem;border-left:2px solid var(--gold);padding-left:.6rem;}
+
+.info-actions{display:flex;gap:.5rem;}
+.info-calc-btn{
+  flex:1;background:var(--gold);color:#fff;border:none;
+  padding:.5rem .75rem;border-radius:var(--radius-sm);
+  font-size:.78rem;font-weight:700;text-align:center;
+  text-decoration:none;transition:background .2s;
+}
+.info-calc-btn:hover{background:var(--gold-light);color:#fff;}
+.info-sl-btn{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-size:.85rem;
+  padding:.5rem .65rem;border-radius:var(--radius-sm);
+  transition:all .2s;
+}
+.info-sl-btn:hover,.info-sl-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(184,147,58,.08);}
+
+/* ── Cost overlay chips ──────────────────────────────────── */
+.leaflet-cost-marker{
+  background:var(--navy) !important;
+  color:#fff !important;
+  border:1px solid rgba(184,147,58,.5) !important;
+  border-radius:6px !important;
+  font-size:.65rem !important;
+  font-weight:700 !important;
+  padding:2px 6px !important;
+  white-space:nowrap !important;
+  cursor:pointer !important;
+  box-shadow:0 1px 6px rgba(0,0,0,.35) !important;
+}
+.leaflet-cost-marker.top{border-color:var(--gold) !important;background:rgba(15,31,46,.95) !important;}
+
+/* Mobile */
+@media(max-width:640px){
+  html,body{overflow:auto;}
+  .map-wrap{min-height:55vh;}
+  .info-panel{position:relative;width:100%;right:auto;bottom:auto;border-radius:0;box-shadow:none;transform:none !important;opacity:1 !important;pointer-events:auto !important;}
+  .map-controls{padding:.6rem .9rem;gap:.6rem;}
+  .dep-btn{min-width:60px;padding:.4rem .6rem;}
+  .instructions{display:none;}
+}
+
+/* ── Hub Toggle Bar ──────────────────────────────────────── */
+.hub-bar{
+  background:var(--navy);
+  padding:.6rem 1.25rem;
+  display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;
+  border-bottom:2px solid var(--gold);
+}
+.hub-bar-label{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;margin-right:.25rem;white-space:nowrap;}
+.hub-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);font-size:.78rem;font-weight:700;padding:.32rem .9rem;border-radius:20px;transition:all .2s ease;white-space:nowrap;}
+.hub-btn:hover{background:rgba(184,147,58,.25);border-color:rgba(184,147,58,.6);color:#fff;}
+.hub-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
+
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────── -->
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">⛳ Golf Trip <span>2025</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">🏠 <span class="nav-link-label">Home</span></a>
+    <a href="explorer.html" class="nav-link active">✈️ <span class="nav-link-label">Flight Map</span></a>
+    <a href="calculator.html" class="nav-link">🧮 <span class="nav-link-label">Calculator</span></a>
+  </div>
+  <div class="nav-right">
+    <button class="nav-shortlist-btn" id="navSlBtn">
+      ⭐ Shortlist <span class="nav-shortlist-count" id="navCount">0</span>
+    </button>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+</nav>
+
+<!-- ── Instruction Strip ──────────────────────────────────── -->
+<div class="instructions">
+  <div class="inst-step"><span class="num">1</span> Choose your departure city below</div>
+  <span class="inst-sep">→</span>
+  <div class="inst-step"><span class="num">2</span> Pick a golf destination from the dropdown</div>
+  <span class="inst-sep">→</span>
+  <div class="inst-step"><span class="num">3</span> See your animated flight path &amp; trip details</div>
+</div>
+
+<!-- ── Map Controls ───────────────────────────────────────── -->
+<div class="map-controls">
+  <!-- Departure selector -->
+  <div class="dep-group">
+    <span class="dep-label">Depart from:</span>
+    <button class="dep-btn active" id="dep-SFO" onclick="setHub('SFO')">
+      <span class="icon">🌉</span>
+      <span class="code">SFO</span>
+      <span class="city">San Francisco</span>
+    </button>
+    <button class="dep-btn" id="dep-LAX" onclick="setHub('LAX')">
+      <span class="icon">🎬</span>
+      <span class="code">LAX</span>
+      <span class="city">Los Angeles</span>
+    </button>
+    <button class="dep-btn" id="dep-JFK" onclick="setHub('JFK')">
+      <span class="icon">🗽</span>
+      <span class="code">JFK</span>
+      <span class="city">New York</span>
+    </button>
+    <button class="dep-btn" id="dep-BOS" onclick="setHub('BOS')">
+      <span class="icon">⚾</span>
+      <span class="code">BOS</span>
+      <span class="city">Boston</span>
+    </button>
+  </div>
+
+  <!-- Destination selector -->
+  <div class="dest-group">
+    <span class="dest-label">Golf destination:</span>
+    <select class="dest-select" id="destSelect" onchange="setDest(this.value)">
+      <option value="">— Choose a destination —</option>
+    </select>
+    <button class="clear-btn" onclick="clearRoute()">✕ Clear</button>
+  </div>
+</div>
+
+<!-- ── Map + Canvas ───────────────────────────────────────── -->
+<div class="map-page">
+  <div class="map-wrap">
+    <div id="map"></div>
+    <canvas id="arcCanvas"></canvas>
+
+    <!-- Info Panel -->
+    <div class="info-panel" id="infoPanel">
+      <img class="info-img" id="infoImg" src="" alt="">
+      <div class="info-body">
+        <div class="info-header">
+          <span class="info-name" id="infoName"></span>
+          <button class="info-close" onclick="clearRoute()">✕</button>
+        </div>
+        <div class="info-stats">
+          <div class="info-stat">
+            <span class="lbl">✈ Flight</span>
+            <span class="val gold" id="infoFlight"></span>
+          </div>
+          <div class="info-stat">
+            <span class="lbl">⛳ Golf</span>
+            <span class="val" id="infoGolf"></span>
+          </div>
+          <div class="info-stat">
+            <span class="lbl">🌡 Aug High</span>
+            <span class="val" id="infoTemp"></span>
+          </div>
+        </div>
+        <div class="info-stats" style="margin-top:-.3rem;">
+          <div class="info-stat">
+            <span class="lbl">💰 Total/pp</span>
+            <span class="val gold" id="infoTotal"></span>
+          </div>
+          <div class="info-stat">
+            <span class="lbl">🏌 $/Round</span>
+            <span class="val" id="infoRound"></span>
+          </div>
+          <div class="info-stat">
+            <span class="lbl">🛂 Passport</span>
+            <span class="val" id="infoPassport"></span>
+          </div>
+        </div>
+        <div class="info-courses">
+          <div class="info-courses-title">Top Courses</div>
+          <ul id="infoCourseList"></ul>
+        </div>
+        <div class="info-notes" id="infoNotes"></div>
+        <div class="info-actions">
+          <a href="" class="info-calc-btn" id="infoCalcBtn">🧮 Open in Calculator</a>
+          <button class="info-sl-btn" id="infoSlBtn" onclick="toggleInfoShortlist()">☆</button>
+        </div>
+        <div style="padding:.6rem 0 0;">
+          <a href="" id="infoDetailBtn" style="display:block;text-align:center;background:var(--gold);color:#fff;font-weight:700;font-size:.82rem;padding:.55rem;border-radius:8px;text-decoration:none;transition:background .2s;">📋 View Full Destination Details →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+
+// ── roundRect polyfill for older browsers ──
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    this.beginPath();
+    this.moveTo(x + r, y);
+    this.lineTo(x + w - r, y);
+    this.quadraticCurveTo(x + w, y, x + w, y + r);
+    this.lineTo(x + w, y + h - r);
+    this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    this.lineTo(x + r, y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - r);
+    this.lineTo(x, y + r);
+    this.quadraticCurveTo(x, y, x + r, y);
+    this.closePath();
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GLOBALS
+// ─────────────────────────────────────────────────────────────
+var DESTS = window.DESTINATIONS;
+var currentHub = 'SFO';
+var currentDestId = null;
+var map, markers = {}, arcAnim = null;
+
+// Hub coords (approximate city centres for arc drawing)
+var HUB_COORDS = {
+  SFO: [37.619, -122.374],
+  LAX: [33.942, -118.408],
+  JFK: [40.641, -73.778],
+  BOS: [42.365, -71.010]
+};
+
+// ─────────────────────────────────────────────────────────────
+//  SHORTLIST
+// ─────────────────────────────────────────────────────────────
+function loadShortlist() {
+  try { return JSON.parse(localStorage.getItem('golf-shortlist') || '[]'); } catch(e) { return []; }
+}
+function saveShortlist(ids) {
+  try { localStorage.setItem('golf-shortlist', JSON.stringify(ids)); } catch(e){}
+}
+function isShortlisted(id) { return loadShortlist().indexOf(id) !== -1; }
+function toggleSL(id) {
+  var sl = loadShortlist(); var idx = sl.indexOf(id);
+  if (idx === -1) sl.push(id); else sl.splice(idx,1);
+  saveShortlist(sl); updateNavCount();
+}
+function updateNavCount() {
+  var n = loadShortlist().length;
+  document.getElementById('navCount').textContent = n;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  THEME
+// ─────────────────────────────────────────────────────────────
+function toggleTheme() {
+  var html = document.documentElement;
+  var isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  try { localStorage.setItem('golf-theme', isDark ? 'light' : 'dark'); } catch(e){}
+}
+function initTheme() {
+  try { var s = localStorage.getItem('golf-theme'); if(s) document.documentElement.setAttribute('data-theme',s); } catch(e){}
+}
+initTheme();
+
+// ─────────────────────────────────────────────────────────────
+//  POPULATE DESTINATION DROPDOWN
+// ─────────────────────────────────────────────────────────────
+function populateDropdown() {
+  var sel = document.getElementById('destSelect');
+  var groups = { west: [], east: [] };
+  DESTS.forEach(function(d, i) {
+    if (i < 10) groups.west.push(d); else groups.east.push(d);
+  });
+  var wg = document.createElement('optgroup'); wg.label = '🌊 West Coast';
+  groups.west.forEach(function(d) {
+    var o = document.createElement('option'); o.value = d.id;
+    o.textContent = d.name + ' — ' + d.verdict;
+    wg.appendChild(o);
+  });
+  var eg = document.createElement('optgroup'); eg.label = '🌴 East Coast';
+  groups.east.forEach(function(d) {
+    var o = document.createElement('option'); o.value = d.id;
+    o.textContent = d.name + ' — ' + d.verdict;
+    eg.appendChild(o);
+  });
+  sel.appendChild(wg); sel.appendChild(eg);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  MAP INIT
+// ─────────────────────────────────────────────────────────────
+function initMap() {
+  map = L.map('map', { center: [38.5, -98], zoom: 4, zoomControl: true, attributionControl: false });
+
+  // Light tile layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 12
+  }).addTo(map);
+
+  // Attribution (small)
+  L.control.attribution({ prefix: '© OSM' }).addTo(map);
+
+  // Add cost markers for all destinations
+  DESTS.forEach(function(d) {
+    addCostMarker(d);
+  });
+
+  // Add departure city markers
+  addHubMarkers();
+
+  // Resize canvas
+  resizeCanvas();
+  map.on('moveend zoomend resize', resizeCanvas);
+  window.addEventListener('resize', resizeCanvas);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HUB MARKERS (departure cities)
+// ─────────────────────────────────────────────────────────────
+var HUB_ICONS = { SFO:'🌉', LAX:'🎬', JFK:'🗽', BOS:'⚾' };
+var HUB_NAMES = { SFO:'San Francisco', LAX:'Los Angeles', JFK:'New York', BOS:'Boston' };
+
+function addHubMarkers() {
+  Object.keys(HUB_COORDS).forEach(function(hub) {
+    var latlng = HUB_COORDS[hub];
+    var icon = L.divIcon({
+      className: '',
+      html: '<div style="background:#0f1f2e;color:#fff;border:2px solid #b8933a;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;gap:4px;">' +
+            '<span style="font-size:14px">' + HUB_ICONS[hub] + '</span>' +
+            '<span>' + hub + '</span>' +
+            '</div>',
+      iconAnchor: [30, 14]
+    });
+    L.marker(latlng, { icon: icon, zIndexOffset: 1000 })
+      .addTo(map)
+      .bindTooltip(HUB_NAMES[hub], { permanent: false, direction: 'top' });
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  COST MARKERS (destination pins)
+// ─────────────────────────────────────────────────────────────
+function addCostMarker(d) {
+  var cost = window.getTotal(d, { hub: currentHub, nights: 4, rounds: 3, groupSize: 8, lodgingTier: 'mid' });
+  var isTop = d.topPick;
+  var icon = L.divIcon({
+    className: 'leaflet-cost-marker' + (isTop ? ' top' : ''),
+    html: '<span>' + (isTop ? '★ ' : '') + '$' + cost + '</span>',
+    iconSize: null,
+    iconAnchor: [28, 10]
+  });
+  var m = L.marker([d.lat, d.lng], { icon: icon })
+    .addTo(map)
+    .on('click', function() {
+      document.getElementById('destSelect').value = d.id;
+      setDest(d.id);
+    });
+  m.bindTooltip('<strong>' + d.name + '</strong><br>Click for details', { direction: 'top', offset: [0, -8] });
+  markers[d.id] = m;
+}
+
+function refreshCostMarkers() {
+  DESTS.forEach(function(d) {
+    if (markers[d.id]) {
+      map.removeLayer(markers[d.id]);
+      delete markers[d.id];
+    }
+    addCostMarker(d);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HUB SELECTOR
+// ─────────────────────────────────────────────────────────────
+function setHub(hub) {
+  currentHub = hub;
+  // Update button styles
+  document.querySelectorAll('.dep-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('dep-' + hub).classList.add('active');
+  // Refresh markers with new hub costs
+  refreshCostMarkers();
+  // If a destination is selected, redraw arc
+  if (currentDestId) drawArc(currentDestId);
+  // Update info panel cost if open
+  if (currentDestId) {
+    var d = DESTS.find(function(x) { return x.id === currentDestId; });
+    if (d) updateInfoPanel(d);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  DESTINATION SELECTION
+// ─────────────────────────────────────────────────────────────
+function setDest(id) {
+  if (!id) { clearRoute(); return; }
+  currentDestId = id;
+  var d = DESTS.find(function(x) { return x.id === id; });
+  if (!d) return;
+  drawArc(id);
+  updateInfoPanel(d);
+  // Pan map to show both hub and dest
+  var hubLL = HUB_COORDS[currentHub];
+  var destLL = [d.lat, d.lng];
+  var bounds = L.latLngBounds([hubLL, destLL]).pad(0.15);
+  map.fitBounds(bounds, { animate: true, duration: 0.8 });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ARC ANIMATION (canvas, works on file://)
+// ─────────────────────────────────────────────────────────────
+var canvas = null;
+var ctx = null;
+var animFrame = null;
+var planeT = 0;
+var arcPath = null; // {x0,y0,cx,cy,x1,y1}
+
+function resizeCanvas() {
+  canvas = document.getElementById('arcCanvas');
+  var wrap = canvas.parentElement;
+  canvas.width  = wrap.offsetWidth;
+  canvas.height = wrap.offsetHeight;
+  ctx = canvas.getContext('2d');
+  if (arcPath) redrawArc();
+}
+
+function latLngToPixel(lat, lng) {
+  var pt = map.latLngToContainerPoint(L.latLng(lat, lng));
+  return { x: pt.x, y: pt.y };
+}
+
+
+function estimateFlightDuration(hub, dest) {
+  // Simple great-circle approximation using Haversine
+  var hc = HUB_COORDS[hub];
+  var R = 3959; // miles
+  var lat1 = hc[0] * Math.PI / 180;
+  var lat2 = dest.lat * Math.PI / 180;
+  var dLat = (dest.lat - hc[0]) * Math.PI / 180;
+  var dLon = (dest.lng - hc[1]) * Math.PI / 180;
+  var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var miles = R * c;
+  // Avg commercial speed ~500mph + 30min overhead
+  var hrs = miles / 500 + 0.5;
+  var h = Math.floor(hrs);
+  var m = Math.round((hrs - h) * 60);
+  if (m === 60) { h++; m = 0; }
+  return h + 'h ' + (m < 10 ? '0' + m : m) + 'm';
+}
+
+function drawArc(destId) {
+  var d = DESTS.find(function(x) { return x.id === destId; });
+  if (!d) return;
+  var hub = HUB_COORDS[currentHub];
+  var h = latLngToPixel(hub[0], hub[1]);
+  var e = latLngToPixel(d.lat, d.lng);
+
+  // Control point: curve up above the midpoint
+  var mx = (h.x + e.x) / 2;
+  var my = (h.y + e.y) / 2;
+  var dx = e.x - h.x, dy = e.y - h.y;
+  var len = Math.sqrt(dx*dx + dy*dy);
+  var perp = { x: -dy/len, y: dx/len };
+  var curve = Math.min(len * 0.28, 120);
+  arcPath = {
+    x0: h.x, y0: h.y,
+    cx: mx + perp.x * curve,
+    cy: my + perp.y * curve,
+    x1: e.x, y1: e.y
+  };
+
+  // Kill previous animation
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  planeT = 0;
+  animatePlane();
+}
+
+function redrawArc() {
+  if (!arcPath || !ctx) return;
+  var a = arcPath;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Draw dashed arc line
+  ctx.save();
+  ctx.strokeStyle = 'rgba(184,147,58,0.55)';
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash([8, 5]);
+  ctx.beginPath();
+  ctx.moveTo(a.x0, a.y0);
+  ctx.quadraticCurveTo(a.cx, a.cy, a.x1, a.y1);
+  ctx.stroke();
+  // Draw partial "traveled" arc in bright gold up to planeT
+  ctx.strokeStyle = 'rgba(212,168,75,0.9)';
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  var steps = 60;
+  for (var i = 0; i <= Math.floor(planeT * steps); i++) {
+    var t = i / steps;
+    var px = (1-t)*(1-t)*a.x0 + 2*(1-t)*t*a.cx + t*t*a.x1;
+    var py = (1-t)*(1-t)*a.y0 + 2*(1-t)*t*a.cy + t*t*a.y1;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+  // Draw flight duration label at arc midpoint
+  if (planeT >= 0.48) {
+    var t50 = 0.5;
+    var mx50 = (1-t50)*(1-t50)*a.x0 + 2*(1-t50)*t50*a.cx + t50*t50*a.x1;
+    var my50 = (1-t50)*(1-t50)*a.y0 + 2*(1-t50)*t50*a.cy + t50*t50*a.y1;
+    var durDest = currentDestId ? DESTS.find(function(x){ return x.id===currentDestId; }) : null;
+    if (durDest) {
+      var durTxt = estimateFlightDuration(currentHub, durDest);
+      ctx.save();
+      var bw = 72, bh = 24;
+      // Drop shadow
+      ctx.shadowColor = 'rgba(0,0,0,.4)';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#0f1f2e';
+      ctx.beginPath();
+      ctx.roundRect(mx50-bw/2, my50-bh/2, bw, bh, 5);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      // Border
+      ctx.strokeStyle = '#b8933a';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // Text
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✈ ' + durTxt, mx50, my50);
+      ctx.restore();
+    }
+  }
+
+  // Draw plane emoji at planeT position
+  var tp = planeT;
+  var px = (1-tp)*(1-tp)*a.x0 + 2*(1-tp)*tp*a.cx + tp*tp*a.x1;
+  var py = (1-tp)*(1-tp)*a.y0 + 2*(1-tp)*tp*a.cy + tp*tp*a.y1;
+  // Tangent for rotation
+  var dt = 0.02;
+  var tp2 = Math.min(tp + dt, 1);
+  var px2 = (1-tp2)*(1-tp2)*a.x0 + 2*(1-tp2)*tp2*a.cx + tp2*tp2*a.x1;
+  var py2 = (1-tp2)*(1-tp2)*a.y0 + 2*(1-tp2)*tp2*a.cy + tp2*tp2*a.y1;
+  var angle = Math.atan2(py2-py, px2-px);
+  ctx.save();
+  ctx.translate(px, py);
+  ctx.rotate(angle);
+  ctx.font = '18px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('✈', 0, 0);
+  ctx.restore();
+  ctx.restore();
+}
+
+function animatePlane() {
+  planeT += 0.008;
+  if (planeT > 1) planeT = 1;
+  redrawArc();
+  if (planeT < 1) {
+    animFrame = requestAnimationFrame(animatePlane);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  INFO PANEL
+// ─────────────────────────────────────────────────────────────
+function updateInfoPanel(d) {
+  var cost = window.getTotal(d, { hub: currentHub, nights: 4, rounds: 3, groupSize: 8, lodgingTier: 'mid' });
+  document.getElementById('infoImg').src = d.photo;
+  document.getElementById('infoImg').alt = d.name;
+  document.getElementById('infoName').textContent = d.name;
+  document.getElementById('infoFlight').textContent = '$' + d.flights[currentHub];
+  document.getElementById('infoGolf').textContent = d.golf + '/10';
+  document.getElementById('infoTemp').textContent = d.augHigh + '°F';
+  document.getElementById('infoTotal').textContent = '$' + cost + '/pp';
+  document.getElementById('infoRound').textContent = '$' + d.golfPerRound;
+  document.getElementById('infoPassport').textContent = d.passport ? 'Required' : 'Not needed';
+  // Courses (first 4)
+  var ul = document.getElementById('infoCourseList');
+  ul.innerHTML = d.courses.slice(0,4).map(function(c) {
+    return '<li>' + c + '</li>';
+  }).join('');
+  document.getElementById('infoNotes').textContent = d.groupNotes;
+  document.getElementById('infoCalcBtn').href = 'calculator.html#dest=' + d.id + '&hub=' + currentHub;
+  document.getElementById('infoDetailBtn').href = 'destination.html?id=' + d.id;
+  // Shortlist btn
+  var slBtn = document.getElementById('infoSlBtn');
+  var on = isShortlisted(d.id);
+  slBtn.textContent = on ? '★' : '☆';
+  slBtn.className = 'info-sl-btn' + (on ? ' on' : '');
+  // Show panel
+  document.getElementById('infoPanel').classList.add('visible');
+}
+
+function toggleInfoShortlist() {
+  if (!currentDestId) return;
+  toggleSL(currentDestId);
+  var on = isShortlisted(currentDestId);
+  var btn = document.getElementById('infoSlBtn');
+  btn.textContent = on ? '★' : '☆';
+  btn.className = 'info-sl-btn' + (on ? ' on' : '');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  CLEAR ROUTE
+// ─────────────────────────────────────────────────────────────
+function clearRoute() {
+  currentDestId = null;
+  document.getElementById('destSelect').value = '';
+  document.getElementById('infoPanel').classList.remove('visible');
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  arcPath = null;
+  if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Reset map view
+  map.setView([38.5, -98], 4, { animate: true });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────
+updateNavCount();
+populateDropdown();
+initMap();
+
+// Redraw arc when map moves
+var mapMoveTimer = null;
+map.on('move zoom', function() {
+  if (arcPath) {
+    clearTimeout(mapMoveTimer);
+    mapMoveTimer = setTimeout(function() {
+      if (currentDestId) drawArc(currentDestId);
+    }, 50);
+  }
+});
+
+// Shortlist nav button
+document.getElementById('navSlBtn').addEventListener('click', function() {
+  window.location.href = 'index.html';
+});
+
+// Theme persistence
+initTheme();
+</script>
+</body>
+</html>

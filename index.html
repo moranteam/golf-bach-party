@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Golf Bach Party — Destination HQ</title>
+<link rel="stylesheet" href="style-shared.css">
+<script src="data.js"></script>
+<style>
+/* ── Page-specific ───────────────────────────────────────────── */
+.hero{
+  background:linear-gradient(135deg,#0f1f2e 0%,#1a3045 60%,#0f2a1a 100%);
+  padding:3.5rem 1.5rem 3rem;
+  text-align:center;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'⛳';font-size:12rem;opacity:.04;
+  position:absolute;right:-1.5rem;top:-1rem;line-height:1;
+}
+.hero-eyebrow{
+  font-size:.75rem;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;
+}
+.hero h1{color:#fff;margin-bottom:1rem;}
+.hero-sub{color:rgba(255,255,255,.65);font-size:1rem;max-width:500px;margin:0 auto 2.25rem;}
+
+/* Feature cards */
+.feature-cards{
+  display:grid;grid-template-columns:1fr 1fr;gap:1rem;
+  max-width:680px;margin:0 auto 1.5rem;
+}
+@media(max-width:520px){.feature-cards{grid-template-columns:1fr;max-width:340px;}}
+.feature-card{
+  position:relative;border-radius:var(--radius);overflow:hidden;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  text-decoration:none;transition:all .25s ease;
+  display:flex;flex-direction:column;align-items:center;
+  padding:1.75rem 1.25rem 1.25rem;text-align:center;
+  min-height:140px;
+}
+.feature-card:hover{
+  transform:translateY(-3px);
+  background:rgba(184,147,58,.15);
+  border-color:rgba(184,147,58,.5);
+}
+.feature-icon{font-size:2.5rem;margin-bottom:.6rem;display:block;}
+.feature-title{color:#fff;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:.25rem;}
+.feature-desc{color:rgba(255,255,255,.55);font-size:.78rem;line-height:1.4;margin-bottom:.7rem;}
+.feature-cta{
+  background:var(--gold);color:#fff;
+  font-size:.75rem;font-weight:700;
+  padding:.3rem .8rem;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.05em;
+  transition:background .2s;
+}
+.feature-card:hover .feature-cta{background:var(--gold-light);}
+
+/* Sort bar */
+.controls-bar{
+  background:var(--cream2);
+  border-bottom:1px solid var(--border);
+  padding:.75rem 1.25rem;
+  display:flex;align-items:center;
+  gap:.75rem;flex-wrap:wrap;
+}
+.sort-label{font-size:.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;}
+.sort-btn{
+  background:var(--white);border:1px solid var(--border);
+  color:var(--text-muted);font-size:.78rem;font-weight:600;
+  padding:.35rem .8rem;border-radius:20px;
+  transition:all var(--transition);
+}
+.sort-btn:hover{border-color:var(--gold);color:var(--gold);}
+.sort-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
+
+.shortlist-filter-btn{
+  margin-left:auto;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-size:.78rem;font-weight:600;
+  padding:.35rem .8rem;border-radius:20px;
+  transition:all var(--transition);display:flex;align-items:center;gap:.35rem;
+}
+.shortlist-filter-btn:hover{border-color:var(--gold);color:var(--gold);}
+.shortlist-filter-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+/* Compare bar */
+.compare-bar{
+  position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);
+  background:var(--navy);color:#fff;
+  padding:.65rem 1.25rem;border-radius:40px;
+  box-shadow:var(--shadow-lg);
+  display:flex;align-items:center;gap:1rem;
+  font-size:.85rem;z-index:500;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease;
+}
+.compare-bar.visible{opacity:1;pointer-events:auto;}
+.compare-bar strong{color:var(--gold);}
+.compare-bar a{
+  background:var(--gold);color:#fff;
+  font-weight:700;font-size:.8rem;
+  padding:.4rem .9rem;border-radius:20px;
+  text-decoration:none;
+}
+.compare-bar a:hover{background:var(--gold-light);}
+
+/* Section */
+.section{padding:2.5rem 1.25rem;}
+.section-title{
+  font-size:1.4rem;color:var(--navy);margin-bottom:.35rem;
+}
+[data-theme="dark"] .section-title{color:var(--cream);}
+.section-sub{font-size:.875rem;color:var(--text-muted);margin-bottom:1.5rem;}
+.section-divider{
+  display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;
+}
+.section-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Destination grid */
+.dest-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:1.1rem;
+}
+
+/* Destination card */
+.dest-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+  transition:transform .2s ease,box-shadow .2s ease;
+  position:relative;
+}
+.dest-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.dest-card.shortlisted{border-color:var(--gold);box-shadow:0 0 0 2px rgba(184,147,58,.3);}
+.dest-card.hidden{display:none;}
+
+.card-img-wrap{position:relative;}
+.card-img{width:100%;height:150px;object-fit:cover;display:block;}
+.card-rank{
+  position:absolute;top:.5rem;left:.5rem;
+  background:rgba(15,31,46,.75);color:#fff;
+  font-size:.68rem;font-weight:700;
+  padding:.15rem .45rem;border-radius:4px;
+  font-family:Inter,sans-serif;
+}
+.card-shortlist-btn{
+  position:absolute;top:.4rem;right:.4rem;
+  background:rgba(15,31,46,.65);
+  border:none;
+  color:rgba(255,255,255,.6);
+  font-size:1.1rem;line-height:1;
+  width:30px;height:30px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  transition:all .2s ease;
+  backdrop-filter:blur(4px);
+}
+.card-shortlist-btn:hover{background:rgba(15,31,46,.9);color:var(--gold);}
+.card-shortlist-btn.on{color:var(--gold);background:rgba(15,31,46,.85);}
+
+.card-body{padding:.85rem .9rem;}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.4rem;}
+.card-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text);line-height:1.2;}
+.card-best-for{
+  font-size:.7rem;color:var(--text-muted);font-style:italic;
+  margin-bottom:.6rem;line-height:1.3;
+}
+.card-stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:.3rem;margin-bottom:.65rem;
+}
+.stat-chip{
+  background:var(--cream2);border-radius:6px;
+  padding:.3rem .4rem;text-align:center;
+}
+.stat-chip .label{font-size:.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;display:block;}
+.stat-chip .val{font-size:.85rem;font-weight:700;color:var(--text);}
+.stat-chip .val.gold{color:var(--gold);}
+
+.card-footer{
+  border-top:1px solid var(--border-light);
+  padding-top:.55rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-courses{font-size:.7rem;color:var(--text-muted);}
+.card-courses strong{color:var(--text);}
+
+/* Passport note */
+.passport-badge{
+  display:inline-flex;align-items:center;gap:.2rem;
+  font-size:.65rem;font-weight:600;color:#d97706;
+  background:#fef3c7;padding:.1rem .35rem;border-radius:4px;
+  margin-top:.4rem;
+}
+
+/* ── Hub Toggle Bar ──────────────────────────────────────── */
+.hub-bar{
+  background:var(--navy);
+  padding:.6rem 1.25rem;
+  display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;
+  border-bottom:2px solid var(--gold);
+}
+.hub-bar-label{
+  font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);
+  text-transform:uppercase;letter-spacing:.1em;margin-right:.25rem;white-space:nowrap;
+}
+.hub-btn{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.7);
+  font-size:.78rem;font-weight:700;
+  padding:.32rem .9rem;border-radius:20px;
+  transition:all .2s ease;white-space:nowrap;
+}
+.hub-btn:hover{background:rgba(184,147,58,.25);border-color:rgba(184,147,58,.6);color:#fff;}
+.hub-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
+/* Make cards clickable */
+.dest-card{cursor:pointer;}
+.card-detail-btn{
+  display:inline-block;
+  background:var(--navy);color:#fff;
+  font-size:.68rem;font-weight:700;
+  padding:.25rem .65rem;border-radius:20px;
+  text-decoration:none;
+  transition:background .15s ease;
+  white-space:nowrap;
+}
+[data-theme="dark"] .card-detail-btn{background:rgba(255,255,255,.12);}
+.card-detail-btn:hover{background:var(--gold);}
+
+
+/* ── Compare selection ───────────────────────────────────── */
+.dest-card.compare-selected{
+  border:2px solid #22c55e !important;
+  box-shadow:0 0 0 3px rgba(34,197,94,.25) !important;
+  transform:translateY(-2px);
+}
+.dest-card:hover{
+  border-color:var(--gold) !important;
+  box-shadow:0 0 0 2px rgba(184,147,58,.3), var(--shadow-md) !important;
+}
+.card-compare-btn{
+  display:block;width:100%;margin-top:.45rem;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text-muted);
+  font-size:.7rem;font-weight:700;
+  padding:.28rem .5rem;border-radius:20px;
+  transition:all .2s ease;
+  text-align:center;
+}
+.card-compare-btn:hover{border-color:#22c55e;color:#16a34a;background:rgba(34,197,94,.07);}
+.card-compare-btn.selected{background:#22c55e;border-color:#22c55e;color:#fff;}
+
+/* ── Comparison Modal ────────────────────────────────────── */
+.compare-modal-overlay{
+  position:fixed;inset:0;z-index:900;
+  background:rgba(10,20,30,.8);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+  padding:1rem;
+}
+.compare-modal-overlay.open{opacity:1;pointer-events:auto;}
+.compare-modal{
+  background:var(--white);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-lg);
+  max-width:1100px;width:100%;
+  max-height:90vh;overflow:auto;
+  transform:translateY(20px);
+  transition:transform .3s ease;
+}
+.compare-modal-overlay.open .compare-modal{transform:translateY(0);}
+.compare-modal-header{
+  background:var(--navy);color:#fff;
+  padding:1rem 1.25rem;
+  display:flex;align-items:center;justify-content:space-between;
+  border-radius:var(--radius) var(--radius) 0 0;
+  position:sticky;top:0;z-index:10;
+}
+.compare-modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;}
+.compare-modal-close{
+  background:rgba(255,255,255,.1);border:none;color:#fff;
+  font-size:1.1rem;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.compare-modal-close:hover{background:rgba(255,255,255,.25);}
+
+/* Comparison table */
+.compare-table-wrap{overflow-x:auto;padding:1rem;}
+.compare-table{
+  width:100%;border-collapse:collapse;min-width:500px;
+}
+.compare-table th{
+  background:var(--navy);color:#fff;
+  padding:.7rem .9rem;font-size:.78rem;
+  text-align:center;border-right:1px solid rgba(255,255,255,.1);
+}
+.compare-table th:first-child{text-align:left;min-width:140px;background:rgba(15,31,46,.9);}
+.compare-table th.header-cell{
+  padding:0 !important;
+  vertical-align:top;
+}
+.compare-header-img{
+  width:100%;height:100px;object-fit:cover;display:block;
+}
+.compare-header-info{
+  padding:.5rem .7rem .6rem;
+}
+.compare-header-name{
+  font-family:'Playfair Display',serif;
+  font-size:.92rem;font-weight:700;color:#fff;
+  display:block;margin-bottom:.2rem;
+}
+.compare-header-badge{
+  font-size:.65rem;font-weight:700;
+  padding:.1rem .4rem;border-radius:10px;
+}
+.compare-table td{
+  padding:.6rem .9rem;text-align:center;
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  font-size:.85rem;color:var(--text);
+  vertical-align:middle;
+}
+.compare-table td:first-child{
+  text-align:left;font-weight:600;
+  color:var(--text-muted);font-size:.78rem;
+  background:var(--cream2);
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.compare-table tr:last-child td{border-bottom:none;}
+.compare-val-best{color:#16a34a;font-weight:800;}
+.compare-val-worst{color:#dc2626;font-weight:600;}
+.compare-val-gold{color:var(--gold);font-weight:800;}
+
+/* Course selector chips */
+.course-chips{
+  display:flex;flex-wrap:wrap;gap:.35rem;
+  padding:.5rem .9rem;
+}
+.course-chip{
+  background:var(--cream2);border:1px solid var(--border);
+  color:var(--text-muted);font-size:.68rem;font-weight:600;
+  padding:.2rem .6rem;border-radius:20px;
+  transition:all .2s;cursor:pointer;
+}
+.course-chip:hover{border-color:var(--gold);color:var(--gold);}
+.course-chip.selected{background:var(--gold);border-color:var(--gold);color:#fff;}
+
+/* Compare CTA row */
+.compare-cta-row{
+  padding:.85rem 1.25rem;
+  display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;
+  border-top:1px solid var(--border);
+  background:var(--cream2);
+  border-radius:0 0 var(--radius) var(--radius);
+}
+.compare-calc-btn{
+  background:var(--gold);color:#fff;
+  font-weight:700;font-size:.85rem;
+  padding:.6rem 1.25rem;border-radius:20px;
+  text-decoration:none;transition:background .2s;
+}
+.compare-calc-btn:hover{background:var(--gold-light);}
+.compare-reset-btn{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-size:.82rem;font-weight:600;
+  padding:.6rem 1rem;border-radius:20px;
+  transition:all .2s;
+}
+.compare-reset-btn:hover{border-color:#dc2626;color:#dc2626;}
+
+/* Compare trigger bar */
+.compare-trigger-bar{
+  position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);
+  background:var(--navy);color:#fff;
+  padding:.7rem 1.4rem;border-radius:40px;
+  box-shadow:var(--shadow-lg);
+  display:flex;align-items:center;gap:1rem;
+  font-size:.85rem;z-index:500;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease;
+}
+.compare-trigger-bar.visible{opacity:1;pointer-events:auto;}
+.compare-trigger-bar strong{color:#22c55e;}
+.compare-trigger-btn{
+  background:#22c55e;color:#fff;
+  font-weight:700;font-size:.8rem;
+  padding:.4rem .9rem;border-radius:20px;
+  border:none;transition:background .2s;cursor:pointer;
+}
+.compare-trigger-btn:hover{background:#16a34a;}
+
+[data-theme="dark"] .compare-modal{background:var(--card-dark);}
+[data-theme="dark"] .compare-table td:first-child{background:rgba(255,255,255,.05);}
+
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────── -->
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">⛳ Golf Trip <span>2025</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link active">🏠 <span class="nav-link-label">Home</span></a>
+    <a href="explorer.html" class="nav-link">✈️ <span class="nav-link-label">Flight Map</span></a>
+    <a href="calculator.html" class="nav-link">🧮 <span class="nav-link-label">Calculator</span></a>
+  </div>
+  <div class="nav-right">
+    <button class="nav-shortlist-btn" onclick="toggleDrawer()">
+      ⭐ Shortlist <span class="nav-shortlist-count" id="navCount">0</span>
+    </button>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌓</button>
+  </div>
+</nav>
+
+<!-- ── Hub Toggle Bar ─────────────────────────────────────── -->
+<div class="hub-bar">
+  <span class="hub-bar-label">✈ Departure Hub:</span>
+  <button class="hub-btn active" id="hub-SFO" onclick="setHub('SFO',this)">🌉 SFO — San Francisco</button>
+  <button class="hub-btn" id="hub-LAX" onclick="setHub('LAX',this)">🌴 LAX — Los Angeles</button>
+  <button class="hub-btn" id="hub-JFK" onclick="setHub('JFK',this)">🗽 JFK — New York</button>
+  <button class="hub-btn" id="hub-BOS" onclick="setHub('BOS',this)">🦞 BOS — Boston</button>
+  <span style="margin-left:auto;font-size:.72rem;color:rgba(255,255,255,.4);">Costs update instantly</span>
+</div>
+
+<!-- ── Shortlist Drawer ───────────────────────────────────── -->
+<div class="shortlist-drawer" id="shortlistDrawer">
+  <div class="drawer-header">
+    <h3>⭐ My Shortlist</h3>
+    <button class="drawer-close" onclick="toggleDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody">
+    <p class="drawer-empty">No destinations shortlisted yet.<br>Click ⭐ on any card to add.</p>
+  </div>
+  <div class="drawer-footer">
+    <a href="calculator.html" class="btn-calc" id="drawerCalcBtn">🧮 Open in Calculator</a>
+    <button class="btn-share" onclick="shareShortlist()">🔗 Copy Share Link</button>
+  </div>
+</div>
+
+<!-- ── Hero ──────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-eyebrow">Bachelor Party Golf Trip</div>
+  <h1>Find Your Course</h1>
+  <p class="hero-sub">20 curated destinations ranked and scored. Use the tools below to explore, plan, and share.</p>
+
+  <div class="feature-cards">
+    <a href="explorer.html" class="feature-card">
+      <span class="feature-icon">🗺️</span>
+      <div class="feature-title">Interactive Flight Map</div>
+      <div class="feature-desc">Animated flight arcs, cost pins & destination info for SFO, LAX, JFK, and BOS</div>
+      <span class="feature-cta">Open Map →</span>
+    </a>
+    <a href="calculator.html" class="feature-card">
+      <span class="feature-icon">🧮</span>
+      <div class="feature-title">Trip Cost Calculator</div>
+      <div class="feature-desc">Dial in group size, nights, rounds & lodging. Compare up to 3 trips side-by-side</div>
+      <span class="feature-cta">Calculate →</span>
+    </a>
+  </div>
+</section>
+
+<!-- ── Sort / Filter Bar ──────────────────────────────────── -->
+<div class="controls-bar">
+  <span class="sort-label">Sort:</span>
+  <button class="sort-btn active" data-sort="rank" onclick="setSort('rank',this)">🏆 Ranking</button>
+  <button class="sort-btn" data-sort="cost" onclick="setSort('cost',this)">💰 Cost</button>
+  <button class="sort-btn" data-sort="golf" onclick="setSort('golf',this)">⛳ Golf</button>
+  <button class="sort-btn" data-sort="scenery" onclick="setSort('scenery',this)">🏔 Scenery</button>
+  <button class="shortlist-filter-btn" id="shortlistFilterBtn" onclick="toggleShortlistFilter()">⭐ Shortlisted only</button>
+</div>
+
+<!-- ── Destination Sections ───────────────────────────────── -->
+<main>
+  <section class="section">
+    <div class="section-divider">
+      <h2 class="section-title">🌊 West Coast Top 10</h2>
+    </div>
+    <p class="section-sub">Pacific Northwest, Desert Southwest, and Canada — the best golf west of the Rockies.</p>
+    <div class="dest-grid" id="westGrid"></div>
+  </section>
+
+  <section class="section" style="background:var(--cream2);padding-top:2.5rem;padding-bottom:2.5rem;">
+    <div class="section-divider">
+      <h2 class="section-title">🌴 East Coast Top 10</h2>
+    </div>
+    <p class="section-sub">Great Lakes, Southeast, and Midwest — serious golf from Wisconsin to South Carolina.</p>
+    <div class="dest-grid" id="eastGrid"></div>
+  </section>
+</main>
+
+<!-- ── Compare Trigger Bar ────────────────────────────────── -->
+<div class="compare-trigger-bar" id="compareBar">
+  <span>🟢 <strong id="compareCount">0</strong> selected for compare</span>
+  <button class="compare-trigger-btn" onclick="openCompareModal()">View Comparison →</button>
+</div>
+
+<!-- ── Footer ────────────────────────────────────────────── -->
+<footer style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);">
+  ⛳ Golf Bach Party 2025 · All costs estimated per person · Prices vary by season
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  STATE & HELPERS
+// ─────────────────────────────────────────────────────────────
+var DESTS = window.DESTINATIONS;
+var currentSort = 'rank';
+var shortlistOnly = false;
+var compareList = [];          // must be declared before renderCard
+
+var BEST_FOR = {
+  'central-oregon':       'Best All-Around Western Trip',
+  'bandon-dunes':         'Top Golf Experience in America',
+  'coeur-dalene':         'Best Mountain-Lake Setting',
+  'gamble-sands':         'Best Under-the-Radar Pilgrimage',
+  'st-george':            'Most Dramatic Red-Rock Scenery',
+  'kelowna':              'Best Wine-Country Golf Value',
+  'mesquite':             'Most Visually Insane Course',
+  'palm-springs':         'Best Desert Glamour Experience',
+  'boise':                'Best Budget Western Option',
+  'kamloops':             'Cheapest Green Fees on the List',
+  'traverse-city':        'Best Value for East-Coast Crews',
+  'whistling-straits':    'Top Bucket-List Ryder Cup Site',
+  'sand-valley':          'Wisconsin\'s Answer to Bandon',
+  'kiawah-island':        'Most Prestigious Ocean-Links',
+  'streamsong':           'Wildest Golf Landscape in the US',
+  'pinehurst':            'Golf\'s Ancestral Home',
+  'reynolds-lake-oconee': 'Best-Value Southeast Luxury',
+  'myrtle-beach':         'Best Party + Golf Combo Value',
+  'french-lick':          'Best Self-Contained Midwest Resort',
+  'austin':               'Best Nightlife + Golf Combo'
+};
+
+// ─────────────────────────────────────────────────────────────
+//  SHORTLIST (localStorage)
+// ─────────────────────────────────────────────────────────────
+function loadShortlist() {
+  try { return JSON.parse(localStorage.getItem('golf-shortlist') || '[]'); }
+  catch(e) { return []; }
+}
+function saveShortlist(ids) {
+  try { localStorage.setItem('golf-shortlist', JSON.stringify(ids)); } catch(e){}
+}
+function isShortlisted(id) { return loadShortlist().indexOf(id) !== -1; }
+function toggleShortlist(id) {
+  var sl = loadShortlist();
+  var idx = sl.indexOf(id);
+  if (idx === -1) sl.push(id); else sl.splice(idx,1);
+  saveShortlist(sl);
+  updateAllShortlistUI();
+}
+
+function updateAllShortlistUI() {
+  var sl = loadShortlist();
+  var count = sl.length;
+  // nav count
+  document.getElementById('navCount').textContent = count;
+  // card buttons & borders
+  DESTS.forEach(function(d) {
+    var btn = document.getElementById('sl-'+d.id);
+    var card = document.getElementById('card-'+d.id);
+    if (!btn || !card) return;
+    var on = sl.indexOf(d.id) !== -1;
+    btn.textContent = on ? '★' : '☆';
+    btn.className = 'card-shortlist-btn' + (on ? ' on' : '');
+    card.className = 'dest-card' + (on ? ' shortlisted' : '') + (shouldHide(d,sl) ? ' hidden' : '');
+  });
+  // compare bar
+  var bar = document.getElementById('compareBar');
+  document.getElementById('compareCount').textContent = count;
+  if (count >= 2) { bar.classList.add('visible'); }
+  else { bar.classList.remove('visible'); }
+  // drawer
+  renderDrawer(sl);
+}
+
+function shouldHide(d, sl) {
+  if (!shortlistOnly) return false;
+  return sl.indexOf(d.id) === -1;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  VERDICT BADGE CLASS
+// ─────────────────────────────────────────────────────────────
+function badgeClass(verdict) {
+  if (verdict === 'Top Tier')    return 'badge badge-top';
+  if (verdict === 'Splurge Pick') return 'badge badge-splurge';
+  if (verdict === 'Solid Pick')  return 'badge badge-solid';
+  if (verdict === 'Budget Gem')  return 'badge badge-budget';
+  if (verdict === 'Hidden Gem')  return 'badge badge-hidden';
+  return 'badge badge-value';
+}
+
+// ─────────────────────────────────────────────────────────────
+//  CARD RENDERING
+// ─────────────────────────────────────────────────────────────
+var currentHub = 'SFO';
+function costFrom(d) {
+  return window.getTotal(d, {hub:currentHub, nights:4, rounds:3, groupSize:8, lodgingTier:'mid'});
+}
+
+function renderCard(d, rank) {
+  var cost = costFrom(d);
+  var sl = loadShortlist();
+  var on = sl.indexOf(d.id) !== -1;
+  var hidden = shouldHide(d, sl);
+  return '<div class="dest-card'+(on?' shortlisted':'')+(hidden?' hidden':'')+'" id="card-'+d.id+'" data-destid="'+d.id+'">' +
+    '<div class="card-img-wrap">' +
+      '<img class="card-img" src="'+d.photo+'" alt="'+d.name+'" loading="lazy">' +
+      '<span class="card-rank">#'+rank+'</span>' +
+      '<button class="card-shortlist-btn'+(on?' on':'')+'" id="sl-'+d.id+'" onclick="toggleShortlist(\''+d.id+'\')" title="Shortlist">'+(on?'★':'☆')+'</button>' +
+    '</div>' +
+    '<div class="card-body">' +
+      '<div class="card-header">' +
+        '<span class="card-name">'+d.name+'</span>' +
+        '<span class="'+badgeClass(d.verdict)+'">'+d.verdict+'</span>' +
+      '</div>' +
+      '<div class="card-best-for">'+( BEST_FOR[d.id] || d.vibe )+'</div>' +
+      '<div class="card-stats">' +
+        '<div class="stat-chip"><span class="label">From '+currentHub+'</span><span class="val gold">$'+cost+'</span></div>' +
+        '<div class="stat-chip"><span class="label">Golf</span><span class="val">'+d.golf+'/10</span></div>' +
+        '<div class="stat-chip"><span class="label">Aug High</span><span class="val">'+d.augHigh+'°F</span></div>' +
+      '</div>' +
+      '<div class="card-footer">' +
+        '<div class="card-courses"><strong>'+d.courses.length+'</strong> courses · '+d.airport+'</div>' +
+        '<a class="card-detail-btn" href="destination.html?id='+d.id+'" onclick="event.stopPropagation()">View →</a>' +
+      '</div>' +
+      '<div style="padding:.3rem .9rem;">' +
+        '<button class="card-compare-btn'+(isInCompare(d.id)?' selected':'')+'" id="cmp-'+d.id+'" onclick="toggleCompare(\''+d.id+'\',event)">'+(isInCompare(d.id)?'✓ In Comparison':'+ Compare')+'</button>' +
+      '</div>' +
+      (d.passport ? '<div style="padding:.1rem .9rem .55rem"><span class="passport-badge">🛂 Passport Required</span></div>' : '') +
+    '</div>' +
+  '</div>';
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HUB TOGGLE
+// ─────────────────────────────────────────────────────────────
+function setHub(hub, btn) {
+  currentHub = hub;
+  document.querySelectorAll('.hub-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderGrids();
+  updateAllShortlistUI();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SORT
+// ─────────────────────────────────────────────────────────────
+function setSort(type, btn) {
+  currentSort = type;
+  document.querySelectorAll('.sort-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderGrids();
+}
+
+function sortedDests(dests) {
+  var copy = dests.slice();
+  if (currentSort === 'cost') {
+    copy.sort(function(a,b){ return costFrom(a)-costFrom(b); });
+  } else if (currentSort === 'golf') {
+    copy.sort(function(a,b){ return b.golf-a.golf; });
+  } else if (currentSort === 'scenery') {
+    copy.sort(function(a,b){ return b.drama-a.drama; });
+  }
+  // rank: keep original order (destinations are already ranked in data.js)
+  return copy;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  RENDER GRIDS
+// ─────────────────────────────────────────────────────────────
+function renderGrids() {
+  if (!DESTS || DESTS.length === 0) {
+    console.error('DESTINATIONS data not loaded. Check data.js path.');
+    document.getElementById('westGrid').innerHTML = '<p style="color:red;padding:1rem">⚠️ Error: data.js not loaded. Make sure all files are in the same folder.</p>';
+    return;
+  }
+  var west  = DESTS.slice(0,10);  // indices 0-9  = West
+  var east  = DESTS.slice(10,20); // indices 10-19 = East
+
+  var westSorted = sortedDests(west);
+  var eastSorted = sortedDests(east);
+
+  var wg = document.getElementById('westGrid');
+  var eg = document.getElementById('eastGrid');
+
+  wg.innerHTML = westSorted.map(function(d,i){
+    var origIdx = DESTS.indexOf(d);
+    return renderCard(d, origIdx+1);
+  }).join('');
+
+  eg.innerHTML = eastSorted.map(function(d,i){
+    var origIdx = DESTS.indexOf(d);
+    return renderCard(d, origIdx+1);
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SHORTLIST FILTER TOGGLE
+// ─────────────────────────────────────────────────────────────
+function toggleShortlistFilter() {
+  shortlistOnly = !shortlistOnly;
+  var btn = document.getElementById('shortlistFilterBtn');
+  btn.classList.toggle('active', shortlistOnly);
+  updateAllShortlistUI();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  DRAWER
+// ─────────────────────────────────────────────────────────────
+var drawerOpen = false;
+function toggleDrawer() {
+  drawerOpen = !drawerOpen;
+  document.getElementById('shortlistDrawer').classList.toggle('open', drawerOpen);
+}
+
+function renderDrawer(sl) {
+  var body = document.getElementById('drawerBody');
+  if (!sl || sl.length === 0) {
+    body.innerHTML = '<p class="drawer-empty">No destinations shortlisted yet.<br>Click ⭐ on any card to add.</p>';
+    return;
+  }
+  var html = '';
+  sl.forEach(function(id) {
+    var d = DESTS.find(function(x){ return x.id === id; });
+    if (!d) return;
+    var cost = costFrom(d);
+    html += '<div class="drawer-item">' +
+      '<img src="'+d.photo+'" alt="'+d.name+'">' +
+      '<div class="drawer-item-info">' +
+        '<div class="drawer-item-name">'+d.name+'</div>' +
+        '<div class="drawer-item-cost">~$'+cost+'/person from '+currentHub+'</div>' +
+      '</div>' +
+      '<button class="drawer-item-remove" onclick="toggleShortlist(\''+d.id+'\')" title="Remove">✕</button>' +
+    '</div>';
+  });
+  body.innerHTML = html;
+
+  // Build calculator URL with shortlist
+  var calcUrl = 'calculator.html#sl=' + sl.join(',');
+  var calcBtn = document.getElementById('drawerCalcBtn');
+  if (calcBtn) calcBtn.href = calcUrl;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SHARE SHORTLIST
+// ─────────────────────────────────────────────────────────────
+function shareShortlist() {
+  var sl = loadShortlist();
+  var url = window.location.href.split('#')[0] + '#sl=' + sl.join(',');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function(){
+      alert('Link copied! Share it with Cal 🎉');
+    });
+  } else {
+    prompt('Copy this link:', url);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  LOAD SHORTLIST FROM URL HASH
+// ─────────────────────────────────────────────────────────────
+function loadHashShortlist() {
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('sl=') !== -1) {
+    var ids = hash.replace('#sl=','').split(',').filter(Boolean);
+    if (ids.length > 0) {
+      saveShortlist(ids);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  DARK MODE
+// ─────────────────────────────────────────────────────────────
+function toggleTheme() {
+  var html = document.documentElement;
+  var isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  try { localStorage.setItem('golf-theme', isDark ? 'light' : 'dark'); } catch(e){}
+}
+function initTheme() {
+  try {
+    var saved = localStorage.getItem('golf-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  } catch(e){}
+}
+
+// ─────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────
+initTheme();
+loadHashShortlist();
+renderGrids();
+updateAllShortlistUI();
+
+// Export to CSV
+function exportCSV() {
+  var rows = [['Rank','Name','Region','Verdict','Best For','Cost/Person (SFO)','Golf Score','$/Round','Aug High','Airport','Drive','Courses','Passport']];
+  DESTS.forEach(function(d,i) {
+    rows.push([
+      i+1, d.name, d.region, d.verdict, BEST_FOR[d.id]||d.vibe,
+      costFrom(d), d.golf, d.golfPerRound, d.augHigh+'°F',
+      d.airport, d.drive, d.courses.join('; '), d.passport?'Yes':'No'
+    ]);
+  });
+  var csv = rows.map(function(r){ return r.map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var blob = new Blob([csv], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'golf-trip-destinations.csv';
+  a.click();
+}
+
+
+// ─────────────────────────────────────────────────────────────
+//  COMPARE LIST
+// ─────────────────────────────────────────────────────────────
+function isInCompare(id) { return compareList.indexOf(id) !== -1; }
+
+function toggleCompare(id, e) {
+  if (e) e.stopPropagation();
+  var idx = compareList.indexOf(id);
+  if (idx !== -1) {
+    compareList.splice(idx, 1);
+  } else {
+    if (compareList.length >= 4) {
+      alert('You can compare up to 4 destinations at a time. Remove one first.');
+      return;
+    }
+    compareList.push(id);
+  }
+  // Update button and card border
+  var btn = document.getElementById('cmp-'+id);
+  var card = document.getElementById('card-'+id);
+  if (btn) {
+    var inCmp = isInCompare(id);
+    btn.textContent = inCmp ? '✓ In Comparison' : '+ Compare';
+    btn.className = 'card-compare-btn' + (inCmp ? ' selected' : '');
+    if (card) card.classList.toggle('compare-selected', inCmp);
+  }
+  updateCompareBar();
+}
+
+function updateCompareBar() {
+  var bar = document.getElementById('compareBar');
+  var cnt = document.getElementById('compareCount');
+  if (!bar) return;
+  cnt.textContent = compareList.length;
+  if (compareList.length >= 2) bar.classList.add('visible');
+  else bar.classList.remove('visible');
+}
+
+function clearCompare() {
+  compareList.forEach(function(id) {
+    var btn = document.getElementById('cmp-'+id);
+    var card = document.getElementById('card-'+id);
+    if (btn) { btn.textContent = '+ Compare'; btn.className = 'card-compare-btn'; }
+    if (card) card.classList.remove('compare-selected');
+  });
+  compareList = [];
+  updateCompareBar();
+  closeCompareModal();
+}
+
+function openCompareModal() {
+  if (compareList.length < 2) { alert('Select at least 2 destinations to compare.'); return; }
+  buildCompareTable();
+  document.getElementById('compareModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCompareModal() {
+  document.getElementById('compareModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('compareModalOverlay')) closeCompareModal();
+}
+
+// Keyboard close
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeCompareModal();
+});
+
+function buildCompareTable() {
+  var dests = compareList.map(function(id) {
+    return DESTS.find(function(d){ return d.id === id; });
+  }).filter(Boolean);
+
+  // Stats to compare
+  var rows = [
+    { key: '💰 Total Cost/Person',  fn: function(d){ return '$' + costFrom(d); }, numeric: function(d){ return costFrom(d); }, lowerBetter: true },
+    { key: '✈ Flight Cost',         fn: function(d){ return '$' + d.flights[currentHub]; }, numeric: function(d){ return d.flights[currentHub]; }, lowerBetter: true },
+    { key: '🏨 Lodging/Night',       fn: function(d){ return '$' + d.lodgingTiers.mid; }, numeric: function(d){ return d.lodgingTiers.mid; }, lowerBetter: true },
+    { key: '⛳ Golf Score',          fn: function(d){ return d.golf + '/10'; }, numeric: function(d){ return d.golf; }, lowerBetter: false },
+    { key: '🏌 Cost per Round',      fn: function(d){ return '$' + d.golfPerRound; }, numeric: function(d){ return d.golfPerRound; }, lowerBetter: true },
+    { key: '🌡 Aug High Temp',       fn: function(d){ return d.augHigh + '°F'; }, numeric: function(d){ return d.augHigh; }, lowerBetter: false },
+    { key: '🎉 Nightlife',           fn: function(d){ return d.nightlife + '/10'; }, numeric: function(d){ return d.nightlife; }, lowerBetter: false },
+    { key: '✈ Airport',             fn: function(d){ return d.airport; }, numeric: null },
+    { key: '🚗 Drive from Airport',  fn: function(d){ return d.drive; }, numeric: null },
+    { key: '🛂 Passport',            fn: function(d){ return d.passport ? '⚠ Yes' : '✓ No'; }, numeric: null },
+    { key: '🏆 Verdict',             fn: function(d){ return d.verdict; }, numeric: null },
+  ];
+
+  // Build header row with photos
+  var thead = '<thead><tr><th style="background:rgba(15,31,46,.95);">Category</th>';
+  dests.forEach(function(d) {
+    thead += '<th class="header-cell">' +
+      '<img class="compare-header-img" src="' + d.photo + '" alt="' + d.name + '">' +
+      '<div class="compare-header-info">' +
+        '<span class="compare-header-name">' + d.name + '</span>' +
+        '<span class="' + badgeClass(d.verdict) + ' compare-header-badge">' + d.verdict + '</span>' +
+      '</div>' +
+    '</th>';
+  });
+  thead += '</tr></thead>';
+
+  // Build data rows
+  var tbody = '<tbody>';
+  rows.forEach(function(row) {
+    tbody += '<tr><td>' + row.key + '</td>';
+    var vals = dests.map(function(d){ return row.numeric ? row.numeric(d) : null; });
+    var best = null, worst = null;
+    if (row.numeric) {
+      var numVals = vals.filter(function(v){ return v !== null; });
+      if (row.lowerBetter) { best = Math.min.apply(null, numVals); worst = Math.max.apply(null, numVals); }
+      else { best = Math.max.apply(null, numVals); worst = Math.min.apply(null, numVals); }
+    }
+    dests.forEach(function(d, i) {
+      var display = row.fn(d);
+      var cls = '';
+      if (row.numeric && vals[i] !== null) {
+        if (vals[i] === best) cls = 'compare-val-best';
+        else if (vals[i] === worst) cls = 'compare-val-worst';
+      }
+      // Special gold for golf and total cost best
+      if (cls === 'compare-val-best' && !row.lowerBetter) cls = 'compare-val-gold';
+      tbody += '<td class="' + cls + '">' + display + '</td>';
+    });
+    tbody += '</tr>';
+  });
+
+  // Course row
+  tbody += '<tr><td style="vertical-align:top;padding:.6rem .9rem;">⛳ Top Courses</td>';
+  dests.forEach(function(d) {
+    tbody += '<td style="text-align:left;font-size:.75rem;padding:.5rem .8rem;">' +
+      d.courses.slice(0,3).map(function(c){ return '• ' + c; }).join('<br>') +
+    '</td>';
+  });
+  tbody += '</tr>';
+
+  tbody += '</tbody>';
+
+  document.getElementById('compareTable').innerHTML = thead + tbody;
+
+  // Update calculator link
+  var calcLink = document.getElementById('compareCalcLink');
+  if (calcLink) calcLink.href = 'calculator.html#sl=' + compareList.join(',') + '&hub=' + currentHub;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  CARD CLICK-THROUGH  (event delegation — no inline onclick)
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var el = e.target;
+  // Walk up to find a card
+  while (el && el !== document.body) {
+    if (el.getAttribute && el.getAttribute('data-destid')) {
+      // Found a card — only navigate if the click wasn't on a button/link
+      var t = e.target;
+      while (t && t !== el) {
+        if (t.tagName === 'BUTTON' || t.tagName === 'A') return;
+        t = t.parentElement;
+      }
+      window.location.href = 'destination.html?id=' + el.getAttribute('data-destid');
+      return;
+    }
+    el = el.parentElement;
+  }
+});
+</script>
+
+<!-- ── Comparison Modal ──────────────────────────────────── -->
+<div class="compare-modal-overlay" id="compareModalOverlay" onclick="handleOverlayClick(event)">
+  <div class="compare-modal" id="compareModal">
+    <div class="compare-modal-header">
+      <span class="compare-modal-title">⛳ Side-by-Side Destination Comparison</span>
+      <button class="compare-modal-close" onclick="closeCompareModal()">✕</button>
+    </div>
+    <div class="compare-table-wrap">
+      <table class="compare-table" id="compareTable"></table>
+    </div>
+    <div class="compare-cta-row">
+      <a href="calculator.html" class="compare-calc-btn" id="compareCalcLink">🧮 Open Selected in Calculator →</a>
+      <button class="compare-reset-btn" onclick="clearCompare()">🗑 Clear Selection</button>
+      <span style="margin-left:auto;font-size:.75rem;color:var(--text-muted);">Select 2–4 destinations to compare</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Destination Dashboard — Golf Trip Planner</title>
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="style-shared.css" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'dark-bg':     '#071320',
+            'dark-card':   '#0d1f30',
+            'dark-border': '#1a3a5c',
+            'gold':        '#c9a84c',
+            'gold-light':  '#f0c040'
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Shared destination data -->
+  <script src="data.js"></script>
+
+  <style>
+    /* ── Control bar ── */
+    #control-bar {
+      background: var(--dark-surface, #0a1929);
+      border-bottom: 1px solid var(--dark-border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      position: sticky;
+      top: 56px;
+      z-index: 100;
+    }
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .ctrl-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* Filter pill / toggle button */
+    .filter-btn {
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid var(--dark-border);
+      background: var(--dark-card);
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: rgba(201,168,76,0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .filter-btn.toggle-on {
+      background: rgba(201,168,76,0.2);
+      border-color: var(--gold);
+      color: var(--gold-light, #f0c040);
+    }
+
+    /* Sort select */
+    .ctrl-select {
+      background: var(--dark-bg);
+      color: var(--text-secondary);
+      border: 1px solid var(--dark-border);
+      border-radius: 6px;
+      padding: 0.28rem 1.8rem 0.28rem 0.6rem;
+      font-size: 0.72rem;
+      font-family: 'Inter', sans-serif;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a7a94' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      cursor: pointer;
+    }
+    .ctrl-select:focus { outline: none; border-color: var(--gold); }
+    .ctrl-select option { background: #0d1f30; }
+
+    /* Count badge */
+    .count-badge {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      padding-left: 0.5rem;
+    }
+
+    /* ── Destination grid ── */
+    #dest-grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 1.25rem;
+      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    @media (min-width: 540px) { #dest-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 900px) { #dest-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1200px) { #dest-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    /* ── Destination card ── */
+    .dest-card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .dest-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      border-color: var(--dark-border-2, #234872);
+    }
+    .dest-card.top-pick-card {
+      border-color: rgba(201,168,76,0.35);
+    }
+
+    /* Card photo */
+    .card-photo-wrap {
+      position: relative;
+      width: 100%;
+      height: 140px;
+      overflow: hidden;
+    }
+    .card-photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .dest-card:hover .card-photo-wrap img {
+      transform: scale(1.04);
+    }
+    .card-photo-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, rgba(7,19,32,0.75) 100%);
+    }
+    .card-verdict-float {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 0.6rem;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 0.2em 0.55em;
+      border-radius: 999px;
+      color: #fff;
+    }
+    .card-top-badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--gold);
+      color: var(--dark-bg, #071320);
+      font-size: 0.58rem;
+      font-weight: 800;
+      padding: 0.15em 0.5em;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Card body */
+    .card-body {
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 0.4rem;
+    }
+    .card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .card-region {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: -0.15rem;
+    }
+    .card-vibe {
+      font-size: 0.73rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    /* Score mini-row */
+    .card-scores {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.1rem;
+    }
+    .score-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.68rem;
+      padding: 0.2em 0.5em;
+      border-radius: 6px;
+      background: var(--dark-bg, #071320);
+      color: var(--text-secondary);
+      border: 1px solid var(--dark-border);
+    }
+    .score-chip .chip-val { font-weight: 700; color: var(--text-primary); }
+
+    /* Courses list */
+    .card-courses {
+      margin-top: 0.3rem;
+    }
+    .card-courses-title {
+      font-size: 0.63rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+    .card-courses ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .card-courses li {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      padding: 0.12rem 0;
+      padding-left: 0.8rem;
+      position: relative;
+      line-height: 1.4;
+    }
+    .card-courses li::before {
+      content: '⛳';
+      position: absolute;
+      left: 0;
+      font-size: 0.55rem;
+      top: 0.18rem;
+    }
+
+    /* Cost breakdown */
+    .card-cost-block {
+      background: var(--dark-bg, #071320);
+      border: 1px solid var(--dark-border);
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+      margin-top: 0.4rem;
+    }
+    .cost-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      padding: 0.18rem 0;
+    }
+    .cost-line .cost-label { color: var(--text-muted); }
+    .cost-line .cost-val   { color: var(--text-primary); font-weight: 600; }
+    .cost-total-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      padding-top: 0.45rem;
+      margin-top: 0.3rem;
+      border-top: 1px solid var(--dark-border);
+    }
+    .cost-total-line .cost-label { color: var(--text-secondary); font-weight: 600; }
+    .cost-total-line .cost-val   { color: var(--gold); font-weight: 800; font-size: 1rem; }
+
+    /* Group intel (collapsible) */
+    .card-notes-toggle {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.2rem;
+      transition: color 0.15s;
+      background: none;
+      border: none;
+      text-align: left;
+      width: 100%;
+    }
+    .card-notes-toggle:hover { color: var(--gold); }
+    .card-notes-body {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      background: rgba(201,168,76,0.05);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 6px;
+      padding: 0.6rem 0.75rem;
+      margin-top: 0.3rem;
+      display: none;
+    }
+    .card-notes-body.open { display: block; }
+
+    /* Travel tags */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.3rem;
+    }
+    .travel-tag {
+      font-size: 0.6rem;
+      padding: 0.15em 0.5em;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* CTA */
+    .card-cta {
+      margin-top: auto;
+      padding-top: 0.7rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .btn-calc {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 7px;
+      background: rgba(201,168,76,0.15);
+      color: var(--gold);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.15s;
+      border: 1px solid rgba(201,168,76,0.25);
+    }
+    .btn-calc:hover { background: rgba(201,168,76,0.25); color: var(--gold-light); }
+
+    /* Empty state */
+    #empty-state {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+    #empty-state h3 { color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+    /* Mobile control-bar tweaks */
+    @media (max-width: 640px) {
+      #control-bar { padding: 0.6rem 0.9rem; top: auto; position: static; }
+      #dest-grid   { padding: 1rem 0.75rem; gap: 1rem; }
+    }
+  </style>
+</head>
+
+<body class="bg-dark-bg text-white">
+
+  <!-- ══════════════════════════════════════════════════════
+       SITE NAVIGATION
+  ══════════════════════════════════════════════════════ -->
+  <nav class="site-nav">
+    <div class="nav-brand">⛳ BachGolf <span>Trip Planner</span></div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="explorer.html">Map</a></li>
+      <li><a href="calculator.html">Calculator</a></li>
+    </ul>
+  </nav>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       PAGE HEADER
+  ══════════════════════════════════════════════════════ -->
+  <div style="padding:1.5rem 1.5rem 0; max-width:1400px; margin:0 auto;">
+    <h1 class="section-title" style="font-size:1.8rem;">📋 Destination Dashboard</h1>
+    <p class="section-sub" style="margin-bottom:0.75rem;">
+      All 20 destinations — filter, sort, and compare side by side.
+    </p>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       CONTROL BAR
+  ══════════════════════════════════════════════════════ -->
+  <div id="control-bar">
+
+    <!-- Hub -->
+    <div class="ctrl-group">
+      <span class="ctrl-label">✈ Hub:</span>
+      <div id="hub-btns" style="display:flex;gap:0.3rem;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- Region -->
+    <div class="ctrl-group">
+      <span class="ctrl-label">📍 Region:</span>
+      <div id="region-btns" style="display:flex;gap:0.3rem;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- Sort -->
+    <div class="ctrl-group">
+      <span class="ctrl-label">↕ Sort:</span>
+      <select class="ctrl-select" id="sort-select" onchange="window.__dashRender()">
+        <option value="golf">Golf Score</option>
+        <option value="cost">Cost (Low→High)</option>
+        <option value="drama">Scenery/Drama</option>
+        <option value="nightlife">Nightlife</option>
+        <option value="temp">Aug Temp</option>
+        <option value="name">Name (A–Z)</option>
+      </select>
+    </div>
+
+    <!-- Toggles -->
+    <div class="ctrl-group">
+      <button id="toggle-sweat"   class="filter-btn" onclick="window.__dashToggle('sweat')">🥵 Hide Sweat ≥9</button>
+      <button id="toggle-carts"   class="filter-btn" onclick="window.__dashToggle('carts')">🛺 Carts Only</button>
+      <button id="toggle-toppick" class="filter-btn" onclick="window.__dashToggle('toppick')">⭐ Top Picks</button>
+      <button id="toggle-nopass"  class="filter-btn" onclick="window.__dashToggle('nopass')">🇺🇸 No Passport</button>
+    </div>
+
+    <span class="count-badge" id="count-badge">20 shown</span>
+
+  </div><!-- end control-bar -->
+
+
+  <!-- ══════════════════════════════════════════════════════
+       DESTINATION GRID
+  ══════════════════════════════════════════════════════ -->
+  <div id="dest-grid"><!-- populated by JS --></div>
+
+  <div id="empty-state">
+    <h3>No destinations match your filters</h3>
+    <p style="font-size:0.82rem;">Try removing some filters to see more results.</p>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════════════════ -->
+  <footer>
+    <p style="font-family:'Playfair Display',serif; font-size:1rem; color:var(--gold); margin-bottom:0.4rem;">
+      ⛳ BachGolf Trip Planner
+    </p>
+    <p>Prices are estimates — always verify before booking.</p>
+    <p style="margin-top:0.75rem;">
+      <a href="index.html">Home</a> ·
+      <a href="explorer.html">Map</a> ·
+      <a href="calculator.html">Calculator</a>
+    </p>
+  </footer>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       DASHBOARD SCRIPT
+  ══════════════════════════════════════════════════════ -->
+  <script>
+  (function () {
+    'use strict';
+
+    if (!window.DESTINATIONS) {
+      document.getElementById('dest-grid').innerHTML =
+        '<p style="color:#f87171;padding:2rem;">⚠ data.js failed to load. Make sure data.js is in the same folder.</p>';
+      return;
+    }
+
+    var DESTS    = window.DESTINATIONS;
+    var COLORS   = window.VERDICT_COLORS || {};
+    var HUB_LIST = window.HUB_LIST || ['SFO','LAX','JFK','BOS'];
+
+    /* ── State ── */
+    var state = {
+      hub:      'SFO',
+      region:   'all',
+      sort:     'golf',
+      sweat:    false,   // hide sweat >= 9
+      carts:    false,   // carts only
+      toppick:  false,
+      nopass:   false
+    };
+
+    /* ── Regions ── */
+    var regions = ['all'].concat(
+      DESTS.map(function(d){ return d.region; })
+        .filter(function(v,i,a){ return a.indexOf(v) === i; })
+        .sort()
+    );
+
+    /* ── Helper: cost per person ── */
+    function cost(d) {
+      return window.getTotal
+        ? window.getTotal(d, { hub: state.hub, nights: 3, rounds: 3, groupSize: 20, lodgingTier: 'mid' })
+        : d.flights[state.hub] + d.golfPerRound * 3 + 210 + Math.round((d.lodgingTiers.mid * 3) / 20);
+    }
+
+    /* ── Build hub buttons ── */
+    function buildHubBtns() {
+      var wrap = document.getElementById('hub-btns');
+      if (!wrap) return;
+      wrap.innerHTML = HUB_LIST.map(function(code) {
+        return '<button class="filter-btn' + (code === state.hub ? ' active' : '') + '"' +
+               ' onclick="window.__setHub(\'' + code + '\')">' + code + '</button>';
+      }).join('');
+    }
+
+    /* ── Build region buttons ── */
+    function buildRegionBtns() {
+      var wrap = document.getElementById('region-btns');
+      if (!wrap) return;
+      wrap.innerHTML = regions.map(function(r) {
+        var label = r === 'all' ? 'All' : r;
+        return '<button class="filter-btn' + (r === state.region ? ' active' : '') + '"' +
+               ' onclick="window.__setRegion(\'' + r + '\')">' + label + '</button>';
+      }).join('');
+    }
+
+    /* ── Toggle states ── */
+    function refreshToggles() {
+      var map = { sweat:'toggle-sweat', carts:'toggle-carts', toppick:'toggle-toppick', nopass:'toggle-nopass' };
+      Object.keys(map).forEach(function(k) {
+        var el = document.getElementById(map[k]);
+        if (el) el.classList.toggle('toggle-on', !!state[k]);
+      });
+    }
+
+    /* ── Filter + sort DESTS ── */
+    function getVisible() {
+      var sort = document.getElementById('sort-select');
+      if (sort) state.sort = sort.value;
+
+      var list = DESTS.filter(function(d) {
+        if (state.region !== 'all' && d.region !== state.region) return false;
+        if (state.sweat   && d.sweatScore >= 9) return false;
+        if (state.carts   && !d.carts)          return false;
+        if (state.toppick && !d.topPick)        return false;
+        if (state.nopass  && d.passport)        return false;
+        return true;
+      });
+
+      list.sort(function(a, b) {
+        switch (state.sort) {
+          case 'cost':      return cost(a) - cost(b);
+          case 'drama':     return b.drama - a.drama;
+          case 'nightlife': return b.nightlife - a.nightlife;
+          case 'temp':      return b.augHigh - a.augHigh;
+          case 'name':      return a.name.localeCompare(b.name);
+          default:          return b.golf - a.golf || a.name.localeCompare(b.name);
+        }
+      });
+
+      return list;
+    }
+
+    /* ── Score chip HTML ── */
+    function chip(icon, label, val, color) {
+      return '<span class="score-chip">' + icon +
+        ' <span class="chip-val"' + (color ? ' style="color:' + color + '"' : '') + '>' +
+        val + '</span> ' + label + '</span>';
+    }
+
+    /* ── Render card HTML ── */
+    function cardHtml(d) {
+      var c   = cost(d);
+      var bg  = COLORS[d.verdict] || '#3b82f6';
+      var hub = state.hub;
+
+      // Scores color coding
+      var tempColor = d.augHigh >= 100 ? '#f87171' : d.augHigh >= 85 ? '#fb923c' : '#86efac';
+      var sweatColor= d.sweatScore >= 8 ? '#f87171' : d.sweatScore >= 6 ? '#fb923c' : '#86efac';
+
+      // Lodging breakdown
+      var lod = Math.round((d.lodgingTiers.mid * 3) / 20);
+      var golf = d.golfPerRound * 3;
+      var food = 70 * 3;
+      var car  = d.rentalCar ? Math.ceil((65 * 3) / 20) : 0;
+      var fl   = d.flights[hub] || 0;
+
+      // Top 4 courses (truncate)
+      var courses = d.courses.slice(0, 4);
+
+      // Tags
+      var tags = [];
+      if (d.passport)   tags.push({ t: '🛂 Passport', bg: 'rgba(234,179,8,0.18)',  col: '#fde047' });
+      if (!d.carts)     tags.push({ t: '🚶 Walk only', bg: 'rgba(52,211,153,0.15)', col: '#6ee7b7' });
+      if (d.rentalCar)  tags.push({ t: '🚗 Car needed', bg: 'rgba(59,130,246,0.15)', col: '#93c5fd' });
+      if (d.topPick)    tags.push({ t: '⭐ Top Pick',   bg: 'rgba(201,168,76,0.2)',  col: '#f0c040' });
+
+      var id = d.id;
+
+      return [
+        '<div class="dest-card' + (d.topPick ? ' top-pick-card' : '') + '" id="dc-' + id + '">',
+
+          /* Photo */
+          '<div class="card-photo-wrap">',
+            '<img src="' + (d.photo || '') + '"',
+                ' alt="' + d.name + '"',
+                ' loading="lazy"',
+                ' onerror="this.style.background=\'#1a3a5c\';this.removeAttribute(\'src\')"',
+            '/>',
+            '<div class="card-photo-overlay"></div>',
+            '<span class="card-verdict-float" style="background:' + bg + '">' + d.verdict + '</span>',
+            d.topPick ? '<span class="card-top-badge">Top Pick</span>' : '',
+          '</div>',
+
+          /* Body */
+          '<div class="card-body">',
+
+            '<div>',
+              '<div class="card-name">' + d.name + '</div>',
+              '<div class="card-region">' + d.region + ' · ' + d.airport + '</div>',
+            '</div>',
+
+            '<p class="card-vibe">' + (d.vibe || '') + '</p>',
+
+            /* Score chips */
+            '<div class="card-scores">',
+              chip('⛳', 'Golf', d.golf + '/10'),
+              chip('🎭', 'Drama', d.drama + '/10'),
+              chip('🌙', 'Night', d.nightlife + '/10'),
+              chip('🌡', 'Aug', d.augHigh + '°F', tempColor),
+              chip('🥵', 'Sweat', d.sweatScore + '/10', sweatColor),
+            '</div>',
+
+            /* Courses */
+            '<div class="card-courses">',
+              '<div class="card-courses-title">⛳ Courses</div>',
+              '<ul>',
+                courses.map(function(c){ return '<li>' + c + '</li>'; }).join(''),
+                d.courses.length > 4 ? '<li style="color:var(--text-muted);">+ ' + (d.courses.length - 4) + ' more</li>' : '',
+              '</ul>',
+            '</div>',
+
+            /* Cost block */
+            '<div class="card-cost-block">',
+              '<div class="cost-line"><span class="cost-label">✈ Flight (' + hub + ')</span><span class="cost-val">$' + fl + '</span></div>',
+              '<div class="cost-line"><span class="cost-label">🏨 Lodging /person</span><span class="cost-val">$' + lod + '</span></div>',
+              '<div class="cost-line"><span class="cost-label">⛳ Golf (3 rounds)</span><span class="cost-val">$' + golf + '</span></div>',
+              '<div class="cost-line"><span class="cost-label">🍽 Food (3 days)</span><span class="cost-val">$' + food + '</span></div>',
+              car ? '<div class="cost-line"><span class="cost-label">🚗 Car share</span><span class="cost-val">$' + car + '</span></div>' : '',
+              '<div class="cost-total-line"><span class="cost-label">Total / person</span><span class="cost-val">$' + c + '</span></div>',
+            '</div>',
+
+            /* Tags */
+            tags.length
+              ? '<div class="card-tags">' +
+                  tags.map(function(tg){
+                    return '<span class="travel-tag" style="background:' + tg.bg + ';color:' + tg.col + '">' + tg.t + '</span>';
+                  }).join('') +
+                '</div>'
+              : '',
+
+            /* Group intel toggle */
+            d.groupNotes
+              ? '<button class="card-notes-toggle" onclick="window.__toggleNotes(\'' + id + '\')">' +
+                  '<span id="notes-arrow-' + id + '">▶</span> Group Intel' +
+                '</button>' +
+                '<div class="card-notes-body" id="notes-body-' + id + '">' + d.groupNotes + '</div>'
+              : '',
+
+            /* CTA */
+            '<div class="card-cta">',
+              '<a href="calculator.html" class="btn-calc">🧮 Full Estimate</a>',
+              '<a href="explorer.html" title="View on map" style="font-size:1.2rem;text-decoration:none;opacity:0.7;transition:opacity 0.15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗺️</a>',
+            '</div>',
+
+          '</div>',/* end card-body */
+        '</div>'  /* end dest-card */
+      ].join('');
+    }
+
+    /* ── Render grid ── */
+    window.__dashRender = function() {
+      var list  = getVisible();
+      var grid  = document.getElementById('dest-grid');
+      var empty = document.getElementById('empty-state');
+      var badge = document.getElementById('count-badge');
+
+      if (badge) badge.textContent = list.length + ' shown';
+
+      if (list.length === 0) {
+        if (grid)  grid.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+      } else {
+        if (empty) empty.style.display = 'none';
+        if (grid)  grid.innerHTML = list.map(cardHtml).join('');
+      }
+    };
+
+    /* ── Public handlers ── */
+    window.__setHub = function(code) {
+      state.hub = code;
+      buildHubBtns();
+      window.__dashRender();
+    };
+
+    window.__setRegion = function(r) {
+      state.region = r;
+      buildRegionBtns();
+      window.__dashRender();
+    };
+
+    window.__dashToggle = function(key) {
+      state[key] = !state[key];
+      refreshToggles();
+      window.__dashRender();
+    };
+
+    window.__toggleNotes = function(id) {
+      var body  = document.getElementById('notes-body-' + id);
+      var arrow = document.getElementById('notes-arrow-' + id);
+      if (!body) return;
+      var open = body.classList.toggle('open');
+      if (arrow) arrow.textContent = open ? '▼' : '▶';
+    };
+
+    /* ── Init ── */
+    buildHubBtns();
+    buildRegionBtns();
+    refreshToggles();
+    window.__dashRender();
+
+  }());
+  </script>
+
+</body>
+</html>
